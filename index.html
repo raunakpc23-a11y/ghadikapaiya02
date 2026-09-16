@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniTrack | Premium Productivity</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: '#6366f1',    // Indigo
+                        jee: '#3b82f6',      // Blue
+                        societies: '#a855f7',// Purple
+                        college: '#22c55e',  // Green
+                        personal: '#f97316', // Orange
+                        bgbase: '#0f1115',   // Deep dark
+                        bgpanel: '#16181d'   // Slightly lighter dark
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bgbase text-gray-200 font-sans h-screen flex overflow-hidden selection:bg-brand selection:text-white">
+
+    <!-- LOGIN SCREEN (Multi-User) -->
+    <div id="auth-screen" class="fixed inset-0 bg-bgbase z-[100] flex items-center justify-center transition-opacity duration-300">
+        <div class="bg-bgpanel p-8 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-md text-center">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold tracking-tight text-white mb-2">OmniTrack</h1>
+                <p class="text-gray-400 text-sm">Sign in to your personal workspace</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <input type="text" id="username-input" required placeholder="Enter your username..." class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all">
+                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20">Access Workspace</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP DESKTOP SIDEBAR -->
+    <aside class="w-64 bg-bgpanel border-r border-gray-800 hidden md:flex flex-col justify-between z-10">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-xl font-bold tracking-tight text-white">OmniTrack</h1>
+            </div>
+            <div class="mb-6 px-3 py-2 bg-bgbase rounded-lg border border-gray-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-brand rounded-full flex items-center justify-center text-xs font-bold text-white" id="user-avatar">U</div>
+                    <span id="current-user-display" class="text-sm font-medium text-gray-300 truncate">User</span>
+                </div>
+                <button onclick="logout()" class="text-gray-500 hover:text-white" title="Logout">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </div>
+            <nav class="space-y-2">
+                <button class="nav-btn active w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium transition-all" onclick="switchTab('calendar', this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Calendar</span>
+                </button>
+                <button class="nav-btn w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all" onclick="switchTab('analytics', this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Dashboard</span>
+                </button>
+            </nav>
+        </div>
+        <div class="p-6">
+            <button onclick="openModal()" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg shadow-lg shadow-indigo-500/20 transition-all">
+                + New Task
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative pb-16 md:pb-0">
+        
+        <!-- CALENDAR TAB -->
+        <div id="view-calendar" class="flex-1 flex flex-col h-full fade-in">
+            <!-- Header Controls -->
+            <header class="bg-bgbase border-b border-gray-800 p-4 md:px-8 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+                <div class="flex items-center space-x-4">
+                    <button onclick="navigateDate(-1)" class="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <h2 id="calendar-header-title" class="text-xl font-semibold w-40 text-center text-white">Today</h2>
+                    <button onclick="navigateDate(1)" class="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4 w-full md:w-auto overflow-x-auto hide-scroll pb-1 md:pb-0">
+                    <div id="calendar-filters" class="flex space-x-1 bg-bgpanel p-1 rounded-lg border border-gray-800">
+                        <button class="filter-btn active bg-gray-700 text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Central">All</button>
+                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="JEE">JEE</button>
+                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Societies">Societies</button>
+                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="College">College</button>
+                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Personal">Personal</button>
+                    </div>
+                    <!-- View Toggle (Grid/List) -->
+                    <div class="flex space-x-1 bg-bgpanel p-1 rounded-lg border border-gray-800">
+                        <button id="toggle-list" onclick="setCalendarMode('list')" class="bg-gray-700 text-white p-1 rounded-md" title="Daily List View">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                        <button id="toggle-grid" onclick="setCalendarMode('grid')" class="text-gray-400 hover:text-white p-1 rounded-md" title="Month Grid View">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Inner Views -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-bgbase">
+                
+                <!-- Daily List View -->
+                <div id="mode-list" class="max-w-4xl mx-auto w-full">
+                    <div id="task-list" class="space-y-3"></div>
+                    <div id="empty-state" class="hidden flex-col items-center justify-center mt-32 text-gray-500">
+                        <svg class="w-12 h-12 mb-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <p class="text-sm font-medium">No tasks scheduled for this day.</p>
+                    </div>
+                </div>
+
+                <!-- Monthly Grid View -->
+                <div id="mode-grid" class="hidden max-w-6xl mx-auto w-full h-full flex flex-col">
+                    <div class="grid grid-cols-7 gap-px bg-gray-800 mb-px rounded-t-lg overflow-hidden border border-gray-800 text-xs font-semibold text-gray-400 text-center">
+                        <div class="bg-bgpanel py-2">Sun</div><div class="bg-bgpanel py-2">Mon</div><div class="bg-bgpanel py-2">Tue</div><div class="bg-bgpanel py-2">Wed</div><div class="bg-bgpanel py-2">Thu</div><div class="bg-bgpanel py-2">Fri</div><div class="bg-bgpanel py-2">Sat</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-800 flex-1 border border-t-0 border-gray-800 rounded-b-lg overflow-hidden">
+                        <!-- Grid cells injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="view-analytics" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in bg-bgbase">
+            <div class="max-w-5xl mx-auto w-full space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Analytics & Insights</h2>
+                    <p class="text-sm text-gray-400 mt-1">Comprehensive breakdown of your productivity across categories.</p>
+                </div>
+                
+                <!-- Top Stats Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Completion Rate</div>
+                        <div class="text-3xl font-bold text-white" id="stat-overall-rate">0%</div>
+                    </div>
+                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Tasks</div>
+                        <div class="text-3xl font-bold text-white" id="stat-total-tasks">0</div>
+                    </div>
+                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Most Delayed</div>
+                        <div class="text-lg font-bold text-red-400 mt-2 truncate" id="stat-most-delayed">None</div>
+                    </div>
+                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Top Category</div>
+                        <div class="text-lg font-bold text-brand mt-2 truncate" id="stat-top-cat">None</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Category Breakdown -->
+                    <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
+                        <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Performance by Category</h3>
+                        <div id="analytics-categories" class="space-y-5">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Time Allocation vs Success -->
+                    <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
+                        <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Time Allocation (Hours Logged)</h3>
+                        <div id="analytics-time" class="space-y-5">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bgpanel border-t border-gray-800 flex justify-around items-center px-2 py-3 z-40 pb-safe">
+        <button class="mobile-nav-btn active flex flex-col items-center space-y-1 text-brand" onclick="switchTab('calendar', this)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="text-[10px] font-medium">Calendar</span>
+        </button>
+        <button onclick="openModal()" class="flex flex-col items-center justify-center w-12 h-12 bg-brand text-white rounded-full -mt-8 shadow-lg shadow-indigo-500/30 border-4 border-bgbase">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        </button>
+        <button class="mobile-nav-btn flex flex-col items-center space-y-1 text-gray-500" onclick="switchTab('analytics', this)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span class="text-[10px] font-medium">Analytics</span>
+        </button>
+    </nav>
+
+    <!-- TASK MODAL -->
+    <div id="task-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-bgpanel rounded-2xl shadow-2xl w-full max-w-lg border border-gray-800 overflow-hidden transform scale-95 transition-transform duration-200" id="task-modal-content">
+            <div class="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-bgbase">
+                <h3 id="modal-title" class="text-lg font-bold text-white">New Task</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <form id="task-form" class="p-6 space-y-5">
+                <input type="hidden" id="task-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Title</label>
+                    <input type="text" id="task-title" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="task-date" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Category</label>
+                        <select id="task-category" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none">
+                            <option value="JEE">JEE</option>
+                            <option value="Societies">Societies</option>
+                            <option value="College">College</option>
+                            <option value="Personal">Personal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Start Time</label>
+                        <input type="time" id="task-start" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">End Time</label>
+                        <input type="time" id="task-end" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    </div>
+                </div>
+                
+                <div id="status-container" class="hidden pt-4 border-t border-gray-800">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Status</label>
+                    <select id="task-status" class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none">
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Partially Completed">Partially Completed</option>
+                        <option value="Delayed">Delayed</option>
+                        <option value="Abandoned">Abandoned</option>
+                    </select>
+                </div>
+
+                <div id="reflection-container" class="hidden">
+                    <label class="block text-xs font-semibold text-red-400 uppercase tracking-wider mb-1.5">Reflection (Why did this fail/delay?)</label>
+                    <textarea id="task-reflection" rows="2" class="w-full bg-bgbase border border-red-900/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-transparent border border-gray-700 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 text-sm font-medium">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
