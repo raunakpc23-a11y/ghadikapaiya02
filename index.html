@@ -1,335 +1,392 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OmniTrack | Premium Productivity</title>
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Pre-load Theme Script to prevent FOUC -->
     <script>
+        const savedTheme = localStorage.getItem('omnitrack_theme') || 'system';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark)) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        const savedShade = localStorage.getItem('omnitrack_shade') || 'ocean';
+        document.documentElement.classList.add(`theme-${savedShade}`);
+
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: '#6366f1',
-                        jee: '#3b82f6',
-                        societies: '#a855f7',
-                        college: '#22c55e',
-                        personal: '#f97316',
-                        bgbase: '#0f1115',
-                        bgpanel: '#16181d'
+                        brand: 'var(--brand-color)',
+                        brandHover: 'var(--brand-hover)',
+                        brandLight: 'var(--brand-light)',
+                        brandDark: 'var(--brand-dark)',
+                        bgLight: '#f8fafc',
+                        bgPanelLight: '#ffffff',
+                        bgDark: '#0f1115',
+                        bgPanelDark: '#1a1d24'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-bgbase text-gray-200 font-sans h-screen flex overflow-hidden selection:bg-brand selection:text-white">
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-bgDark dark:to-gray-900 text-slate-800 dark:text-gray-200 font-sans h-screen flex overflow-hidden selection:bg-brand selection:text-white transition-all duration-300">
 
-    <!-- AUTHENTICATION SCREEN -->
-    <div id="auth-screen" class="fixed inset-0 bg-bgbase/90 backdrop-blur-md z-[100] flex items-center justify-center transition-opacity duration-300 overflow-y-auto py-10">
-        <div class="bg-bgpanel p-8 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-md">
+    <!-- 1. AUTHENTICATION OVERLAY -->
+    <div id="auth-screen" class="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center transition-opacity duration-300 overflow-y-auto py-10">
+        <div class="bg-white/90 dark:bg-bgPanelDark/90 backdrop-blur-xl p-8 rounded-3xl border border-white/40 dark:border-gray-700/50 shadow-2xl w-full max-w-md transform transition-all fade-in">
             <div class="mb-6 text-center">
-                <h1 class="text-3xl font-bold tracking-tight text-white mb-2">OmniTrack</h1>
-                <p class="text-gray-400 text-sm">Secure Personal Workspace</p>
+                <div class="w-12 h-12 bg-brand/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-brand">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">OmniTrack</h1>
+                <p class="text-slate-500 dark:text-gray-400 text-sm">Sign in to your workspace</p>
             </div>
             
-            <!-- Auth Toggle -->
-            <div class="flex p-1 bg-bgbase rounded-lg mb-6 border border-gray-800">
-                <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-all shadow-sm">Login</button>
-                <button id="tab-register" onclick="toggleAuth('register')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-all">Register</button>
+            <div class="flex p-1 bg-slate-100 dark:bg-bgDark rounded-xl mb-6 border border-slate-200 dark:border-gray-800">
+                <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-gray-800 text-slate-900 dark:text-white shadow-sm transition-all">Login</button>
+                <button id="tab-register" onclick="toggleAuth('register')" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-all">Register</button>
             </div>
 
-            <div id="auth-error" class="hidden mb-4 p-3 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400 text-sm text-center font-medium"></div>
+            <div id="auth-error" class="hidden mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-sm text-center font-medium"></div>
 
             <!-- Login Form -->
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Username</label>
-                    <input type="text" id="login-username" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Email / Username</label>
+                    <input type="text" id="login-email" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Secret Code</label>
-                    <input type="password" id="login-secret" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Password</label>
+                    <input type="password" id="login-password" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
-                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 mt-2">Access Workspace</button>
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="login-remember" class="w-4 h-4 rounded text-brand border-slate-300 dark:border-gray-600 focus:ring-brand bg-slate-50 dark:bg-bgDark">
+                    <label for="login-remember" class="text-sm font-medium text-slate-600 dark:text-gray-400">Remember Me</label>
+                </div>
+                <button type="submit" class="w-full bg-brand hover:bg-brandHover text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-brand/30 mt-2">Sign In</button>
             </form>
 
             <!-- Register Form -->
             <form id="register-form" class="space-y-4 hidden">
-                <div class="text-xs text-brand font-medium text-center mb-2 bg-brand/10 py-1.5 rounded-md border border-brand/20">
-                    Database Cap: <span id="user-count-display">0</span>/10 Users Registered
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" id="reg-name" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Desired Username</label>
-                    <input type="text" id="reg-username" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Full Name</label>
-                        <input type="text" id="reg-fullname" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Role (e.g. Student)</label>
-                        <input type="text" id="reg-role" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Email / Username</label>
+                    <input type="text" id="reg-email" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Secret Registration Code</label>
-                    <input type="password" id="reg-secret" required placeholder="Required for access..." class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Password</label>
+                    <input type="password" id="reg-password" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
-                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 mt-2">Create Account</button>
+                <button type="submit" class="w-full bg-brand hover:bg-brandHover text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-brand/30 mt-2">Create Account</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP DESKTOP SIDEBAR -->
-    <aside class="w-64 bg-bgpanel border-r border-gray-800 hidden md:flex flex-col justify-between z-10">
+    <!-- 2. CATEGORY ONBOARDING MODAL -->
+    <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-md hidden z-[90] items-center justify-center transition-opacity py-10 px-4">
+        <div class="bg-white/90 dark:bg-bgPanelDark/90 backdrop-blur-xl p-8 rounded-3xl border border-white/40 dark:border-gray-700/50 shadow-2xl w-full max-w-2xl transform transition-all fade-in">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Welcome to OmniTrack</h2>
+            <p class="text-slate-500 dark:text-gray-400 text-sm mb-6">Select the categories that matter to your workflow. You can change these later.</p>
+            
+            <div id="onboarding-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+                <!-- Injected via JS -->
+            </div>
+            
+            <button onclick="saveOnboarding()" class="w-full bg-brand hover:bg-brandHover text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-brand/30">Continue to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- 3. MAIN APP LAYOUT -->
+    <aside class="w-64 bg-white/60 dark:bg-bgPanelDark/60 backdrop-blur-xl border-r border-white/40 dark:border-gray-800/50 hidden md:flex flex-col justify-between z-10 shadow-lg">
         <div class="p-6">
-            <div class="flex items-center justify-between mb-8">
-                <h1 class="text-xl font-bold tracking-tight text-white">OmniTrack</h1>
-            </div>
-            <div class="mb-6 px-3 py-3 bg-bgbase rounded-xl border border-gray-800 flex items-center justify-between shadow-inner">
-                <div class="flex items-center space-x-3 overflow-hidden">
-                    <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" id="user-avatar">U</div>
-                    <div class="flex flex-col overflow-hidden">
-                        <span id="current-user-display" class="text-sm font-bold text-gray-200 truncate leading-tight">User</span>
-                        <span id="current-user-role" class="text-[10px] font-medium text-gray-500 uppercase tracking-wider truncate">Role</span>
-                    </div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-8 flex items-center space-x-2">
+                <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <button onclick="logout()" class="text-gray-500 hover:text-white shrink-0 ml-2" title="Logout">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                </button>
-            </div>
+                <span>OmniTrack</span>
+            </h1>
             <nav class="space-y-2">
-                <button class="nav-btn active w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium transition-all bg-gray-800 text-white" onclick="switchTab('calendar', this)">
+                <button class="nav-btn active w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-brand/10 text-brand" onclick="switchTab('calendar', this)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span>Calendar</span>
                 </button>
-                <button class="nav-btn w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all" onclick="switchTab('analytics', this)">
+                <button class="nav-btn w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-semibold text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800/50 transition-all" onclick="switchTab('analytics', this)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <span>Dashboard</span>
+                    <span>Analytics</span>
                 </button>
-                <!-- ADMIN ONLY BUTTON -->
-                <button id="nav-admin-btn" class="nav-btn hidden w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all" onclick="switchTab('admin', this)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <span>Admin Panel</span>
+                <button class="nav-btn w-full flex items-center space-x-3 py-3 px-4 rounded-xl text-sm font-semibold text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800/50 transition-all" onclick="switchTab('settings', this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Settings</span>
                 </button>
             </nav>
         </div>
-        <div class="p-6">
-            <button onclick="openModal()" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg shadow-lg shadow-indigo-500/20 transition-all">
-                + New Task
+        <div class="p-6 border-t border-slate-200/50 dark:border-gray-800/50">
+            <button onclick="openEditModal()" class="w-full bg-brand hover:bg-brandHover text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-brand/30 transition-all flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>New Task</span>
             </button>
+            <div class="mt-6 flex items-center space-x-3 bg-white dark:bg-bgDark p-3 rounded-xl border border-slate-200 dark:border-gray-800">
+                <div class="w-10 h-10 bg-brand/20 rounded-full flex items-center justify-center text-brand font-bold" id="user-avatar">U</div>
+                <div class="flex-1 overflow-hidden">
+                    <p id="current-user-display" class="text-sm font-bold text-slate-900 dark:text-white truncate">User</p>
+                    <button onclick="logout()" class="text-xs text-slate-500 hover:text-brand transition-colors">Sign Out</button>
+                </div>
+            </div>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden relative pb-16 md:pb-0">
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative pb-16 md:pb-0 z-0">
         
-        <!-- CALENDAR TAB -->
-        <div id="view-calendar" class="flex-1 flex flex-col h-full fade-in block">
-            <header class="bg-bgbase border-b border-gray-800 p-4 md:px-8 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+        <!-- CALENDAR VIEW -->
+        <div id="view-calendar" class="flex-1 flex flex-col h-full block fade-in">
+            <header class="p-4 md:px-8 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10 border-b border-slate-200/30 dark:border-gray-800/50 bg-white/30 dark:bg-bgPanelDark/30 backdrop-blur-md">
                 <div class="flex items-center space-x-4">
-                    <button onclick="navigateDate(-1)" class="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+                    <button onclick="navigateDate(-1)" class="p-2 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-50 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
-                    <h2 id="calendar-header-title" class="text-xl font-semibold w-40 text-center text-white">Today</h2>
-                    <button onclick="navigateDate(1)" class="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+                    <h2 id="calendar-header-title" class="text-xl font-bold w-48 text-center text-slate-900 dark:text-white">Today</h2>
+                    <button onclick="navigateDate(1)" class="p-2 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-50 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
                 
                 <div class="flex items-center space-x-4 w-full md:w-auto overflow-x-auto hide-scroll pb-1 md:pb-0">
-                    <div id="calendar-filters" class="flex space-x-1 bg-bgpanel p-1 rounded-lg border border-gray-800">
-                        <button class="filter-btn active bg-gray-700 text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Central">All</button>
-                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="JEE">JEE</button>
-                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Societies">Societies</button>
-                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="College">College</button>
-                        <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Personal">Personal</button>
-                    </div>
-                    <div class="flex space-x-1 bg-bgpanel p-1 rounded-lg border border-gray-800">
-                        <button id="toggle-list" onclick="setCalendarMode('list')" class="bg-gray-700 text-white p-1 rounded-md" title="Daily List View">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
-                        <button id="toggle-grid" onclick="setCalendarMode('grid')" class="text-gray-400 hover:text-white p-1 rounded-md" title="Month Grid View">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        </button>
+                    <div id="calendar-filters" class="flex space-x-1 p-1 bg-white dark:bg-bgDark rounded-xl shadow-sm border border-slate-200 dark:border-gray-800">
+                        <button class="filter-btn active bg-slate-200 dark:bg-gray-700 text-slate-900 dark:text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" data-filter="Central">All</button>
+                        <!-- Dynamic Filters Injected Here -->
                     </div>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-bgbase">
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
                 <div id="mode-list" class="max-w-4xl mx-auto w-full">
-                    <div id="task-list" class="space-y-3"></div>
-                    <div id="empty-state" class="hidden flex-col items-center justify-center mt-32 text-gray-500">
-                        <svg class="w-12 h-12 mb-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                        <p class="text-sm font-medium">No tasks scheduled for this day.</p>
+                    <div id="task-list" class="space-y-4"></div>
+                    <div id="empty-state" class="hidden flex-col items-center justify-center mt-32 text-slate-400 dark:text-gray-500 fade-in">
+                        <div class="w-20 h-20 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 border border-slate-200 dark:border-gray-700">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        </div>
+                        <p class="text-base font-medium">No tasks scheduled. Enjoy the silence.</p>
                     </div>
-                </div>
-                <div id="mode-grid" class="hidden max-w-6xl mx-auto w-full h-full flex flex-col">
-                    <div class="grid grid-cols-7 gap-px bg-gray-800 mb-px rounded-t-lg overflow-hidden border border-gray-800 text-xs font-semibold text-gray-400 text-center">
-                        <div class="bg-bgpanel py-2">Sun</div><div class="bg-bgpanel py-2">Mon</div><div class="bg-bgpanel py-2">Tue</div><div class="bg-bgpanel py-2">Wed</div><div class="bg-bgpanel py-2">Thu</div><div class="bg-bgpanel py-2">Fri</div><div class="bg-bgpanel py-2">Sat</div>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-800 flex-1 border border-t-0 border-gray-800 rounded-b-lg overflow-hidden"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ANALYTICS TAB -->
-        <div id="view-analytics" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in bg-bgbase">
+        <!-- ANALYTICS VIEW -->
+        <div id="view-analytics" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in">
             <div class="max-w-5xl mx-auto w-full space-y-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-white tracking-tight">Analytics & Insights</h2>
-                    <p class="text-sm text-gray-400 mt-1">Comprehensive breakdown of your productivity.</p>
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Analytics Overview</h2>
+                    <p class="text-sm text-slate-500 dark:text-gray-400 mt-1">Deep dive into your productivity patterns.</p>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
-                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Completion Rate</div>
-                        <div class="text-3xl font-bold text-white" id="stat-overall-rate">0%</div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <div class="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">Completion</div>
+                        <div class="text-4xl font-extrabold text-slate-900 dark:text-white" id="stat-overall-rate">0%</div>
                     </div>
-                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
-                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Tasks</div>
-                        <div class="text-3xl font-bold text-white" id="stat-total-tasks">0</div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <div class="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">Total Tasks</div>
+                        <div class="text-4xl font-extrabold text-slate-900 dark:text-white" id="stat-total-tasks">0</div>
                     </div>
-                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
-                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Most Delayed</div>
-                        <div class="text-lg font-bold text-red-400 mt-2 truncate" id="stat-most-delayed">None</div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <div class="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">Most Delayed</div>
+                        <div class="text-xl font-bold text-red-500 mt-2 truncate" id="stat-most-delayed">None</div>
                     </div>
-                    <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
-                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Top Category</div>
-                        <div class="text-lg font-bold text-brand mt-2 truncate" id="stat-top-cat">None</div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <div class="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">Top Category</div>
+                        <div class="text-xl font-bold text-brand mt-2 truncate" id="stat-top-cat">None</div>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Performance by Category</h3>
-                        <div id="analytics-categories" class="space-y-5"></div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Success by Category</h3>
+                        <div id="analytics-categories" class="space-y-6"></div>
                     </div>
-                    <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Time Allocation (Hours Logged)</h3>
-                        <div id="analytics-time" class="space-y-5"></div>
+                    <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Time Allocation (Hours)</h3>
+                        <div id="analytics-time" class="space-y-6"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ADMIN TAB -->
-        <div id="view-admin" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in bg-bgbase">
-            <div class="max-w-5xl mx-auto w-full space-y-6">
+        <!-- SETTINGS VIEW -->
+        <div id="view-settings" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in">
+            <div class="max-w-3xl mx-auto w-full space-y-8">
                 <div>
-                    <h2 class="text-2xl font-bold text-red-400 tracking-tight">Admin Master Panel</h2>
-                    <p class="text-sm text-gray-400 mt-1">Manage the database limit and view registered users.</p>
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">App Settings</h2>
+                    <p class="text-sm text-slate-500 dark:text-gray-400 mt-1">Customize your OmniTrack experience.</p>
                 </div>
-                <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
-                    <div class="flex justify-between items-center border-b border-gray-800 pb-4 mb-4">
-                        <h3 class="text-sm font-semibold text-white">Registered Users Database</h3>
-                        <span class="text-xs font-bold bg-gray-800 px-3 py-1 rounded-full text-brand"><span id="admin-user-count">0</span> / 10 Cap</span>
+                
+                <!-- Theme Settings -->
+                <div class="bg-white/80 dark:bg-bgPanelDark/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-200/40 dark:shadow-none space-y-6">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center"><svg class="w-5 h-5 mr-2 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg> Light / Dark Mode</h3>
+                    <div class="flex space-x-3">
+                        <button onclick="setTheme('light')" id="btn-theme-light" class="flex-1 py-3 border border-slate-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all">Light</button>
+                        <button onclick="setTheme('dark')" id="btn-theme-dark" class="flex-1 py-3 border border-slate-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all">Dark</button>
+                        <button onclick="setTheme('system')" id="btn-theme-system" class="flex-1 py-3 border border-slate-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-all">System</button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800">
-                                    <th class="py-3 px-4">Username</th>
-                                    <th class="py-3 px-4">Full Name</th>
-                                    <th class="py-3 px-4">Role</th>
-                                    <th class="py-3 px-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-user-list" class="divide-y divide-gray-800/50">
-                                <!-- Users injected here -->
-                            </tbody>
-                        </table>
+
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center pt-4 border-t border-slate-200 dark:border-gray-700"><svg class="w-5 h-5 mr-2 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg> Generous Shades (Accent)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="setShade('ocean')" class="flex flex-col items-center justify-center p-4 border border-slate-200 dark:border-gray-700 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-blue-500 mb-2 group-hover:scale-110 transition-transform"></div><span class="text-xs font-semibold text-slate-600 dark:text-gray-300">Ocean Blue</span>
+                        </button>
+                        <button onclick="setShade('emerald')" class="flex flex-col items-center justify-center p-4 border border-slate-200 dark:border-gray-700 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 mb-2 group-hover:scale-110 transition-transform"></div><span class="text-xs font-semibold text-slate-600 dark:text-gray-300">Emerald</span>
+                        </button>
+                        <button onclick="setShade('amethyst')" class="flex flex-col items-center justify-center p-4 border border-slate-200 dark:border-gray-700 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-purple-500 mb-2 group-hover:scale-110 transition-transform"></div><span class="text-xs font-semibold text-slate-600 dark:text-gray-300">Amethyst</span>
+                        </button>
+                        <button onclick="setShade('amber')" class="flex flex-col items-center justify-center p-4 border border-slate-200 dark:border-gray-700 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all group">
+                            <div class="w-8 h-8 rounded-full bg-amber-500 mb-2 group-hover:scale-110 transition-transform"></div><span class="text-xs font-semibold text-slate-600 dark:text-gray-300">Amber</span>
+                        </button>
                     </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-red-50 dark:bg-red-900/10 p-8 rounded-2xl border border-red-200 dark:border-red-900/30">
+                    <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mb-2">Danger Zone</h3>
+                    <p class="text-sm text-red-500/80 dark:text-red-400/80 mb-4">Permanently delete your account and all associated tasks. This action cannot be undone.</p>
+                    <button onclick="triggerDeleteModal1()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors shadow-lg shadow-red-600/20">Delete Account</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- MOBILE BOTTOM NAVIGATION -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-bgpanel border-t border-gray-800 flex justify-around items-center px-2 py-3 z-40 pb-safe">
+    <!-- 4. MOBILE BOTTOM NAVIGATION -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-bgPanelDark/90 backdrop-blur-xl border-t border-slate-200 dark:border-gray-800 flex justify-around items-center px-4 py-3 z-40 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
         <button class="mobile-nav-btn active flex flex-col items-center space-y-1 text-brand" onclick="switchTab('calendar', this)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="text-[10px] font-medium">Calendar</span>
+            <span class="text-[10px] font-bold">Calendar</span>
         </button>
-        <button onclick="openModal()" class="flex flex-col items-center justify-center w-12 h-12 bg-brand text-white rounded-full -mt-8 shadow-lg shadow-indigo-500/30 border-4 border-bgbase">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        </button>
-        <button class="mobile-nav-btn flex flex-col items-center space-y-1 text-gray-500" onclick="switchTab('analytics', this)">
+        <button class="mobile-nav-btn flex flex-col items-center space-y-1 text-slate-400 dark:text-gray-500" onclick="switchTab('analytics', this)">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            <span class="text-[10px] font-medium">Analytics</span>
+            <span class="text-[10px] font-bold">Analytics</span>
         </button>
-        <!-- Mobile Admin button hidden by default -->
-        <button id="mobile-nav-admin" class="mobile-nav-btn hidden flex-col items-center space-y-1 text-red-500" onclick="switchTab('admin', this)">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            <span class="text-[10px] font-medium">Admin</span>
+        <button onclick="openEditModal()" class="flex flex-col items-center justify-center w-14 h-14 bg-brand text-white rounded-2xl -mt-10 shadow-xl shadow-brand/40 border-4 border-slate-100 dark:border-bgDark transform hover:scale-105 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+        </button>
+        <button class="mobile-nav-btn flex flex-col items-center space-y-1 text-slate-400 dark:text-gray-500" onclick="switchTab('settings', this)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-[10px] font-bold">Settings</span>
         </button>
     </nav>
 
-    <!-- TASK MODAL -->
-    <div id="task-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-bgpanel rounded-2xl shadow-2xl w-full max-w-lg border border-gray-800 overflow-hidden transform scale-95 transition-transform duration-200" id="task-modal-content">
-            <div class="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-bgbase">
-                <h3 id="modal-title" class="text-lg font-bold text-white">New Task</h3>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-white transition-colors">
+    <!-- 5. TASK EDIT MODAL -->
+    <div id="task-edit-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-md transition-opacity">
+        <div class="bg-white dark:bg-bgPanelDark rounded-3xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-gray-800 overflow-hidden transform scale-95 transition-transform duration-300" id="task-edit-content">
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-gray-800 flex justify-between items-center bg-slate-50 dark:bg-bgDark">
+                <h3 id="edit-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">New Task</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form id="task-form" class="p-6 space-y-5">
                 <input type="hidden" id="task-id">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Title</label>
-                    <input type="text" id="task-title" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">Task Title</label>
+                    <input type="text" id="task-title" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Date</label>
-                        <input type="date" id="task-date" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">Date</label>
+                        <input type="date" id="task-date" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Category</label>
-                        <select id="task-category" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none">
-                            <option value="JEE">JEE</option>
-                            <option value="Societies">Societies</option>
-                            <option value="College">College</option>
-                            <option value="Personal">Personal</option>
+                        <label class="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">Category</label>
+                        <select id="task-category" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all appearance-none">
+                            <!-- Injected -->
                         </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Start Time</label>
-                        <input type="time" id="task-start" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">Start Time</label>
+                        <input type="time" id="task-start" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">End Time</label>
-                        <input type="time" id="task-end" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">End Time</label>
+                        <input type="time" id="task-end" required class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all">
                     </div>
                 </div>
-                <div id="status-container" class="hidden pt-4 border-t border-gray-800">
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Status</label>
-                    <select id="task-status" class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none">
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Partially Completed">Partially Completed</option>
-                        <option value="Delayed">Delayed</option>
-                        <option value="Abandoned">Abandoned</option>
-                    </select>
-                </div>
-                <div id="reflection-container" class="hidden">
-                    <label class="block text-xs font-semibold text-red-400 uppercase tracking-wider mb-1.5">Reflection (Why did this fail/delay?)</label>
-                    <textarea id="task-reflection" rows="2" class="w-full bg-bgbase border border-red-900/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"></textarea>
-                </div>
-                <div class="pt-2 flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-transparent border border-gray-700 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 text-sm font-medium">Save Task</button>
+                <div class="pt-4 flex justify-end space-x-3 border-t border-slate-100 dark:border-gray-800">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors text-sm font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-xl hover:bg-brandHover transition-colors shadow-lg shadow-brand/30 text-sm font-bold">Save Details</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 6. DEDICATED TASK NOTES WINDOW -->
+    <div id="notes-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-opacity">
+        <div class="bg-white dark:bg-bgPanelDark rounded-3xl shadow-2xl w-full max-w-2xl h-[85vh] flex flex-col border border-slate-200 dark:border-gray-800 transform scale-95 transition-transform duration-300" id="notes-modal-content">
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-bgDark rounded-t-3xl flex justify-between items-start">
+                <div>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span id="notes-cat-badge" class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide">Cat</span>
+                        <select id="notes-status-select" onchange="updateNoteStatus(this.value)" class="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-md px-2 py-0.5 text-xs font-bold text-slate-700 dark:text-gray-200 focus:outline-none cursor-pointer">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Partially Completed">Partially Completed</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="Abandoned">Abandoned</option>
+                        </select>
+                    </div>
+                    <h2 id="notes-title" class="text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">Task Title</h2>
+                    <p id="notes-time" class="text-sm font-medium text-slate-500 dark:text-gray-400 mt-1">10:00 AM - 11:00 AM</p>
+                </div>
+                <button onclick="closeNotesModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 p-6 flex flex-col">
+                <textarea id="notes-textarea" class="flex-1 w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-2xl p-5 text-slate-800 dark:text-gray-200 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all resize-none custom-scrollbar text-base leading-relaxed" placeholder="Write your notes, reflections, or reasons for delay here..."></textarea>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 dark:border-gray-800 flex justify-end">
+                <button onclick="saveNotes()" class="px-6 py-3 bg-brand text-white rounded-xl hover:bg-brandHover transition-colors shadow-lg shadow-brand/30 font-bold">Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. DOUBLE CONFIRMATION DELETE MODALS -->
+    <!-- Modal 1 -->
+    <div id="delete-modal-1" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 hidden z-[70] items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white dark:bg-bgPanelDark rounded-3xl shadow-2xl w-full max-w-md p-8 border border-red-200 dark:border-red-900/50 text-center transform scale-95 transition-transform fade-in">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-500">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Account?</h3>
+            <p class="text-sm text-slate-500 dark:text-gray-400 mb-8">Are you absolutely sure you want to delete all tasks and account data? This cannot be undone.</p>
+            <div class="flex space-x-3 justify-center">
+                <button onclick="cancelDelete()" class="px-5 py-2.5 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-gray-700 font-bold flex-1">Cancel</button>
+                <button onclick="triggerDeleteModal2()" class="px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-bold shadow-lg shadow-red-600/30 flex-1">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal 2 -->
+    <div id="delete-modal-2" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 hidden z-[80] items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white dark:bg-bgPanelDark rounded-3xl shadow-2xl w-full max-w-md p-8 border border-red-200 dark:border-red-900/50 transform scale-95 transition-transform fade-in">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Final Confirmation</h3>
+            <p class="text-sm text-slate-500 dark:text-gray-400 mb-6">Please type <strong class="text-red-500 select-none">DELETE</strong> to confirm.</p>
+            <input type="text" id="delete-confirm-input" class="w-full bg-slate-50 dark:bg-bgDark border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 mb-6 text-center font-mono uppercase tracking-widest" placeholder="DELETE">
+            <div class="flex space-x-3 justify-center">
+                <button onclick="cancelDelete()" class="px-5 py-2.5 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-white rounded-xl hover:bg-slate-200 dark:hover:bg-gray-700 font-bold flex-1">Cancel</button>
+                <button id="btn-final-delete" onclick="executeDelete()" disabled class="px-5 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-bold shadow-lg shadow-red-600/30 flex-1 opacity-50 cursor-not-allowed transition-all">Permanently Delete</button>
+            </div>
         </div>
     </div>
 
