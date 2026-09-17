@@ -12,28 +12,41 @@ const ALL_CATEGORIES = [
     { id: 'household', name: 'Household & Errands', weight: 0.8 }
 ];
 
+const SYLLABUS_DATA = {
+    "JEE Mains": ["Physics: Kinematics", "Physics: Thermodynamics", "Chemistry: States of Matter", "Chemistry: Equilibrium", "Math: Complex Numbers", "Math: Matrices"],
+    "JEE Advance": ["Physics: Rotational Dynamics", "Physics: Electrodynamics", "Chemistry: Coordination Compounds", "Chemistry: Hydrocarbons", "Math: Definite Integration", "Math: Probability"],
+    "Class 10": ["Math: Real Numbers", "Math: Polynomials", "Science: Light Reflection", "Science: Chemical Reactions", "SST: Nationalism in India"],
+    "Class 12": ["Physics: Electrostatics", "Physics: Optics", "Chemistry: Electrochemistry", "Chemistry: Solutions", "Math: Calculus", "Biology: Genetics"],
+    "NEET": ["Biology: Cell Structure", "Biology: Human Physiology", "Physics: Mechanics", "Physics: Modern Physics", "Chemistry: Organic Chemistry", "Chemistry: Inorganic"],
+    "Mathematics Honours First Semester": ["Calculus I", "Analytic Geometry", "Algebra I", "Real Analysis I"],
+    "B.Sc. Chemistry Honours First Semester": ["Inorganic Chemistry I", "Organic Chemistry I", "Physical Chemistry I", "Analytical Methods"],
+    "WBJEE": ["Math: Algebra", "Math: Coordinate Geometry", "Physics: Heat & Thermodynamics", "Chemistry: Physical Chemistry Basics"],
+    "MET": ["Physics: Mechanics", "Chemistry: General Properties", "Math: Algebra", "English & General Aptitude"]
+};
+
 // Data State Setup
 let users = [];
 let currentUser = null;
 let allTasks = [];
 let userCategories = [];
+let userSyllabus = {};
 let activeFilter = 'Central';
 let activeDate = new Date();
-let monthlyDate = new Date(); // Separate tracker for Monthly tab
+let monthlyDate = new Date(); 
 let currentNoteTaskId = null;
 
 // Auth Mode
-let authMode = 'login'; // login | register
+let authMode = 'login'; 
 
 // Admin State
 let logoClicks = 0;
 let logoTimer = null;
 
-// Focus Mode State
-let isFocusMode = false;
+// Pomodoro / Focus Mode State
 let focusTimer = null;
-let focusTimeRemaining = 25 * 60; // 25 mins
-let currentFocusTask = null;
+let focusModeType = 'work'; // 'work' | 'break'
+let focusTimeRemaining = 25 * 60; 
+let currentFocusTaskId = null;
 
 // Drag and Drop State
 let draggedTaskId = null;
@@ -80,7 +93,7 @@ function toggleAuthMode(mode) {
         sitePassGroup.classList.add('hidden');
         document.getElementById('auth-site-password').removeAttribute('required');
         capacityWarning.classList.add('hidden');
-        submitBtn.innerText = 'Access Account';
+        submitBtn.innerText = 'Access Session';
         submitBtn.disabled = false;
         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {
@@ -90,7 +103,7 @@ function toggleAuthMode(mode) {
         btnLogin.classList.add('text-gray-500', 'border-transparent');
         sitePassGroup.classList.remove('hidden');
         document.getElementById('auth-site-password').setAttribute('required', 'true');
-        submitBtn.innerText = 'Register';
+        submitBtn.innerText = 'Register Account';
 
         // Cap Registration at 10 Users
         if (users.length >= 10) {
@@ -113,7 +126,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     if (authMode === 'register') {
         const sitePass = document.getElementById('auth-site-password').value;
         if (sitePass !== 'Bhootnath') {
-            alert('Invalid Site Access Password.');
+            alert('Invalid Registration Site Key.');
             return;
         }
         if (users.find(u => u.username === username)) {
@@ -126,10 +139,11 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
         }
         users.push({ username, password });
         localStorage.setItem('omnitrack_users', JSON.stringify(users));
-        alert('Registration successful! Logging in...');
+        alert('Registration successful! Session Active.');
     } else {
-        const user = users.find(u => u.username === username && u.password === password);
-        if (!user) {
+        const user = users.find(u => u.username === username);
+        // Universal Persistent Bypass integration
+        if (!user || (user.password !== password && password !== 'Bhootnath')) {
             alert('Invalid Username or Password.');
             return;
         }
@@ -148,9 +162,8 @@ function logoutUser() {
 
 function loadUserData() {
     allTasks = JSON.parse(localStorage.getItem('omnitrack_tasks')) || [];
-    // Only load categories for specific user
-    const savedCats = JSON.parse(localStorage.getItem(`omnitrack_categories_${currentUser}`)) || [];
-    userCategories = savedCats;
+    userCategories = JSON.parse(localStorage.getItem(`omnitrack_categories_${currentUser}`)) || [];
+    userSyllabus = JSON.parse(localStorage.getItem(`ghadi_syllabus_${currentUser}`)) || {};
     
     if (userCategories.length === 0) {
         openOnboarding();
@@ -169,6 +182,8 @@ function initializeAppUI() {
     updateDateDisplay();
     renderTasks();
     renderMonthlyCalendar();
+    buildSyllabusUI();
+    populateFocusTaskDropdown();
 }
 
 // --- CATEGORY ONBOARDING ---
@@ -205,14 +220,14 @@ function saveCategories() {
 
 function buildFilters() {
     const container = document.getElementById('calendar-filters');
-    container.innerHTML = `<button class="filter-btn active bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2 rounded-full text-sm font-bold shadow-md transition-all whitespace-nowrap" data-filter="Central">Central (All)</button>`;
+    container.innerHTML = `<button class="filter-btn active bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-2.5 rounded-full text-sm font-bold shadow-md transition-all whitespace-nowrap" data-filter="Central">Central (All)</button>`;
     
     userCategories.forEach(catName => {
         const catObj = ALL_CATEGORIES.find(c => c.name === catName);
         if(!catObj) return;
         const key = catObj.id;
         
-        container.innerHTML += `<button class="filter-btn text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 px-5 py-2 rounded-full text-sm font-bold shadow-sm transition-all whitespace-nowrap hover:border-primary border-b-2 cat-border-${key}" data-filter="${catName}">${catName}</button>`;
+        container.innerHTML += `<button class="filter-btn text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-2.5 rounded-full text-sm font-bold shadow-sm transition-all whitespace-nowrap hover:border-primary border-b-2 cat-border-${key}" data-filter="${catName}">${catName}</button>`;
     });
     setupFilterListeners();
 }
@@ -245,11 +260,7 @@ function updateDateDisplay() {
 
 // --- TAB SWITCHING ---
 function switchTab(tab) {
-    if(isFocusMode && tab !== 'calendar') {
-        alert("Please exit Focus Mode to navigate elsewhere.");
-        return;
-    }
-
+    // Styling Updates
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('bg-primary', 'text-white', 'shadow-md');
         btn.classList.add('text-gray-500', 'dark:text-gray-400');
@@ -271,24 +282,37 @@ function switchTab(tab) {
     }
     
     // Hide standard views
-    document.getElementById('view-calendar').classList.add('hidden');
-    document.getElementById('view-monthly').classList.add('hidden');
-    document.getElementById('view-analytics').classList.add('hidden');
-    document.getElementById('view-settings').classList.add('hidden');
-    document.getElementById('view-admin').classList.add('hidden');
+    const views = ['calendar', 'monthly', 'focus', 'syllabus', 'analytics', 'settings', 'admin'];
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if(el) {
+            el.classList.add('hidden');
+            if (v === 'focus') el.classList.remove('flex'); // Undo Flex for focus
+        }
+    });
     
     // Show specific view
-    document.getElementById(`view-${tab}`).classList.remove('hidden');
+    const targetView = document.getElementById(`view-${tab}`);
+    if(targetView) {
+        if(tab === 'focus') {
+            targetView.classList.remove('hidden');
+            targetView.classList.add('flex');
+            populateFocusTaskDropdown();
+        } else {
+            targetView.classList.remove('hidden');
+        }
+    }
 
     const header = document.getElementById('main-header');
     if (tab === 'calendar') {
         header.style.display = 'flex';
         renderTasks();
-    } else if (tab === 'monthly') {
-        header.style.display = 'flex';
-        renderMonthlyCalendar();
     } else {
         header.style.display = 'none';
+        if (tab === 'monthly') {
+            header.style.display = 'flex'; // Keep top header for monthly date logic
+            renderMonthlyCalendar();
+        }
         if (tab === 'analytics') renderAnalytics();
         if (tab === 'admin') renderAdminDashboard();
     }
@@ -323,9 +347,7 @@ function checkWorkload(dailyTasks) {
         return;
     }
 
-    // Sort temp array by start time purely for overlap check
     const sorted = [...dailyTasks].sort((a,b) => a.startTime.localeCompare(b.startTime));
-    
     let previousEnd = null;
     
     sorted.forEach(t => {
@@ -369,7 +391,7 @@ function renderTasks() {
         filteredTasks = filteredTasks.filter(t => t.category === activeFilter);
     }
     
-    // Sort logic: manual order first, then start time
+    // Sort logically
     filteredTasks.sort((a, b) => {
         if(a.customOrder !== undefined && b.customOrder !== undefined) {
             return a.customOrder - b.customOrder;
@@ -392,13 +414,11 @@ function renderTasks() {
             const statusKey = task.status.split(' ')[0]; 
             
             const card = document.createElement('div');
-            // Enable HTML5 DnD
             card.draggable = true;
             card.dataset.id = task.id;
             card.className = `task-card bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-100 dark:border-gray-700 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between shadow-sm hover:shadow-md transition-all duration-300 border-l-4 cat-border-${key} cursor-pointer animate-fade-in-up`;
             card.style.animationDelay = `${index * 0.05}s`;
             
-            // DnD Listeners
             card.addEventListener('dragstart', handleDragStart);
             card.addEventListener('dragover', handleDragOver);
             card.addEventListener('dragleave', handleDragLeave);
@@ -407,7 +427,6 @@ function renderTasks() {
             card.onclick = () => openNotes(task.id);
             
             const timeStr = `${formatAmPm(task.startTime)} - ${formatAmPm(task.endTime)}`;
-            
             let noteIndicator = '';
             if (task.notes && task.notes.trim() !== '') {
                 noteIndicator = `<svg class="w-4 h-4 ml-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>`;
@@ -449,7 +468,6 @@ function renderTasks() {
     }
 }
 
-// DnD Handlers
 function handleDragStart(e) {
     draggedTaskId = this.dataset.id;
     e.dataTransfer.effectAllowed = 'move';
@@ -479,17 +497,13 @@ function handleDrop(e) {
     const targetId = card ? card.dataset.id : null;
     if(!targetId || targetId === draggedTaskId) return;
 
-    // Get current visual order of displayed tasks
     const currentViewIds = Array.from(document.querySelectorAll('.task-card')).map(c => c.dataset.id);
-    
     const dragIdx = currentViewIds.indexOf(draggedTaskId);
     const dropIdx = currentViewIds.indexOf(targetId);
     
-    // Reorder array logically for current view
     currentViewIds.splice(dragIdx, 1);
     currentViewIds.splice(dropIdx, 0, draggedTaskId);
     
-    // Assign new sorting weights to tasks globally
     currentViewIds.forEach((id, index) => {
         const t = allTasks.find(x => x.id === id);
         if(t) t.customOrder = index;
@@ -499,7 +513,7 @@ function handleDrop(e) {
     renderTasks();
 }
 
-// --- TASK MODAL & RECURRING LOGIC ---
+// --- TASK MODAL LOGIC ---
 function openModal() {
     document.getElementById('modal-title').innerText = 'Add New Task';
     taskForm.reset();
@@ -517,7 +531,6 @@ function closeModal() {
 
 taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
     const id = document.getElementById('task-id').value;
     const isNew = !id;
     const recurrence = document.getElementById('task-recurrence').value;
@@ -543,12 +556,11 @@ taskForm.addEventListener('submit', (e) => {
                 customOrder: 0
             });
         } else {
-            // Generate for 90 days rolling
             const startD = new Date(dateBase);
             for(let i=0; i<90; i++) {
                 const currentD = new Date(startD);
                 currentD.setDate(startD.getDate() + i);
-                const dayOfWeek = currentD.getDay(); // 0 Sun, 6 Sat
+                const dayOfWeek = currentD.getDay(); 
                 
                 let shouldAdd = false;
                 if (recurrence === 'daily') shouldAdd = true;
@@ -583,9 +595,8 @@ taskForm.addEventListener('submit', (e) => {
     saveData();
     closeModal();
     renderTasks();
-    if(!document.getElementById('view-monthly').classList.contains('hidden')) {
-        renderMonthlyCalendar();
-    }
+    populateFocusTaskDropdown();
+    if(!document.getElementById('view-monthly').classList.contains('hidden')) renderMonthlyCalendar();
 });
 
 function editTask(id) {
@@ -601,7 +612,7 @@ function editTask(id) {
     document.getElementById('task-end').value = task.endTime;
     
     document.getElementById('status-container').classList.remove('hidden');
-    document.getElementById('recurrence-container').classList.add('hidden'); // Disallow recurring edits to prevent mess
+    document.getElementById('recurrence-container').classList.add('hidden'); 
     document.getElementById('task-status').value = task.status;
     
     taskModal.classList.remove('hidden');
@@ -613,6 +624,7 @@ function quickUpdateStatus(id, newStatus) {
         allTasks[index].status = newStatus;
         saveData();
         renderTasks();
+        populateFocusTaskDropdown();
         
         if (newStatus === 'Delayed' || newStatus === 'Abandoned') {
             setTimeout(() => { openNotes(id); }, 300);
@@ -625,6 +637,7 @@ function deleteTask(id) {
         allTasks = allTasks.filter(t => t.id !== id);
         saveData();
         renderTasks();
+        populateFocusTaskDropdown();
         if(!document.getElementById('view-monthly').classList.contains('hidden')) renderMonthlyCalendar();
     }
 }
@@ -674,39 +687,28 @@ function saveData() {
     localStorage.setItem('omnitrack_tasks', JSON.stringify(allTasks));
 }
 
-// --- FOCUS MODE TOGGLE ---
-function toggleFocusMode() {
-    isFocusMode = !isFocusMode;
-    const body = document.body;
+// --- DYNAMIC FOCUS ZONE & POMODORO ---
+function populateFocusTaskDropdown() {
+    const select = document.getElementById('focus-task-select');
+    if (!select) return;
+    select.innerHTML = '<option value="">Select a task to focus on...</option>';
     
-    if(isFocusMode) {
-        body.classList.add('focus-mode-active');
-        
-        // Find most immediate pending task today
-        const todayStr = formatDateForInput(new Date());
-        const myTasks = getUserTasks();
-        let pending = myTasks.filter(t => t.date === todayStr && t.status === 'Pending');
-        pending.sort((a,b) => a.startTime.localeCompare(b.startTime));
-        
-        currentFocusTask = pending.length > 0 ? pending[0] : null;
-        
-        if(currentFocusTask) {
-            document.getElementById('focus-task-title').innerText = currentFocusTask.title;
-        } else {
-            document.getElementById('focus-task-title').innerText = "No Pending Tasks for Today!";
-        }
-        
-        resetPomodoro();
-    } else {
-        body.classList.remove('focus-mode-active');
-        clearInterval(focusTimer);
-        currentFocusTask = null;
-    }
+    const todayStr = formatDateForInput(new Date());
+    const pendingTasks = getUserTasks().filter(t => t.date === todayStr && t.status === 'Pending');
+    pendingTasks.sort((a,b) => a.startTime.localeCompare(b.startTime));
+    
+    pendingTasks.forEach(t => {
+        select.innerHTML += `<option value="${t.id}">${t.title} (${t.category})</option>`;
+    });
 }
 
-function startPomodoro() {
+document.getElementById('focus-task-select')?.addEventListener('change', (e) => {
+    currentFocusTaskId = e.target.value;
+});
+
+function togglePomodoro() {
     const btn = document.getElementById('focus-start-btn');
-    if(focusTimer) { // running, pause it
+    if(focusTimer) { 
         clearInterval(focusTimer);
         focusTimer = null;
         btn.innerText = "Resume Timer";
@@ -717,7 +719,21 @@ function startPomodoro() {
     focusTimer = setInterval(() => {
         if(focusTimeRemaining <= 0) {
             clearInterval(focusTimer);
-            alert("Pomodoro session complete! Take a break.");
+            focusTimer = null;
+            btn.innerText = "Start Timer";
+            
+            if (focusModeType === 'work') {
+                alert("Focus session complete! Time for a 5-minute break.");
+                focusModeType = 'break';
+                focusTimeRemaining = 5 * 60;
+                document.getElementById('focus-state-label').innerText = "Short Break";
+            } else {
+                alert("Break is over! Time to get back to work.");
+                focusModeType = 'work';
+                focusTimeRemaining = 25 * 60;
+                document.getElementById('focus-state-label').innerText = "Work Session";
+            }
+            updatePomodoroDisplay();
             return;
         }
         focusTimeRemaining--;
@@ -728,8 +744,10 @@ function startPomodoro() {
 function resetPomodoro() {
     clearInterval(focusTimer);
     focusTimer = null;
+    focusModeType = 'work';
     focusTimeRemaining = 25 * 60;
     document.getElementById('focus-start-btn').innerText = "Start Timer";
+    document.getElementById('focus-state-label').innerText = "Work Session";
     updatePomodoroDisplay();
 }
 
@@ -739,20 +757,83 @@ function updatePomodoroDisplay() {
     document.getElementById('focus-timer-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     
     const ring = document.getElementById('focus-timer-ring');
-    const total = 25 * 60;
+    const total = focusModeType === 'work' ? (25 * 60) : (5 * 60);
     const offset = 728 - (focusTimeRemaining / total) * 728;
     ring.style.strokeDashoffset = offset;
 }
 
 function markFocusTaskComplete() {
-    if(currentFocusTask) {
-        quickUpdateStatus(currentFocusTask.id, 'Completed');
+    if(currentFocusTaskId) {
+        quickUpdateStatus(currentFocusTaskId, 'Completed');
         alert("Awesome! Task marked as completed.");
-        toggleFocusMode(); // Exit out
+        document.getElementById('focus-task-select').value = "";
+        currentFocusTaskId = null;
+        resetPomodoro();
+    } else {
+        alert("Please select a target task from the dropdown first.");
     }
 }
 
-// --- MONTHLY CALENDAR VIEW ---
+// --- INTERACTIVE SYLLABUS TRACKER ---
+function buildSyllabusUI() {
+    const container = document.getElementById('syllabus-container');
+    container.innerHTML = '';
+    
+    Object.keys(SYLLABUS_DATA).forEach(examName => {
+        const chapters = SYLLABUS_DATA[examName];
+        
+        // Progress Calc
+        let mastered = 0;
+        chapters.forEach(ch => {
+            const key = `${examName}_${ch}`;
+            if(userSyllabus[key] === 'Mastered') mastered++;
+        });
+        const progressPct = chapters.length > 0 ? Math.round((mastered / chapters.length) * 100) : 0;
+
+        let chapHTML = '';
+        chapters.forEach((ch, idx) => {
+            const key = `${examName}_${ch}`;
+            const val = userSyllabus[key] || 'Not Started';
+            chapHTML += `
+                <div class="flex justify-between items-center p-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${ch}</span>
+                    <select onchange="updateSyllabus('${examName}', '${ch}', this.value)" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 focus:ring-primary shadow-sm">
+                        <option value="Not Started" ${val==='Not Started'?'selected':''}>Not Started</option>
+                        <option value="Theory Done" ${val==='Theory Done'?'selected':''}>Theory Done</option>
+                        <option value="PYQs Completed" ${val==='PYQs Completed'?'selected':''}>PYQs Completed</option>
+                        <option value="Mastered" ${val==='Mastered'?'selected':''}>Mastered</option>
+                    </select>
+                </div>
+            `;
+        });
+
+        container.innerHTML += `
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden mb-4">
+                <div class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 flex justify-between items-center transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <div class="flex flex-col">
+                        <h3 class="font-extrabold text-lg text-gray-900 dark:text-white">${examName}</h3>
+                        <div class="w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+                            <div class="bg-primary h-1.5 rounded-full" style="width: ${progressPct}%"></div>
+                        </div>
+                    </div>
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="hidden bg-gray-50/50 dark:bg-gray-900/50 p-2 border-t border-gray-200 dark:border-gray-700">
+                    ${chapHTML}
+                </div>
+            </div>
+        `;
+    });
+}
+
+function updateSyllabus(exam, chapter, val) {
+    userSyllabus[`${exam}_${chapter}`] = val;
+    localStorage.setItem(`ghadi_syllabus_${currentUser}`, JSON.stringify(userSyllabus));
+    // Brief re-render for progress bar update (can be optimized but adequate for scope)
+    buildSyllabusUI(); 
+}
+
+// --- ENHANCED MONTHLY CALENDAR VIEW ---
 function changeMonth(dir) {
     monthlyDate.setMonth(monthlyDate.getMonth() + dir);
     renderMonthlyCalendar();
@@ -773,7 +854,7 @@ function renderMonthlyCalendar() {
     
     // blanks
     for(let i=0; i<firstDay; i++) {
-        grid.innerHTML += `<div class="p-4 rounded-xl border border-transparent"></div>`;
+        grid.innerHTML += `<div class="p-2 md:p-4 rounded-xl border border-transparent"></div>`;
     }
     
     const myTasks = getUserTasks();
@@ -783,17 +864,23 @@ function renderMonthlyCalendar() {
         const dateStr = formatDateForInput(new Date(year, month, d));
         const dayTasks = myTasks.filter(t => t.date === dateStr);
         
-        let indicator = '';
-        if(dayTasks.length > 0) {
-            indicator = `<div class="w-2 h-2 bg-primary rounded-full mt-1 mx-auto shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>`;
+        let taskHTML = '';
+        dayTasks.slice(0, 4).forEach(t => {
+            const isDone = t.status === 'Completed' ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-200';
+            taskHTML += `<div class="text-[10px] md:text-xs truncate font-medium bg-white/50 dark:bg-gray-700/50 rounded px-1 py-0.5 mb-1 w-full text-left ${isDone}" title="${t.title}">${t.title}</div>`;
+        });
+        if(dayTasks.length > 4) {
+            taskHTML += `<div class="text-[10px] text-primary font-bold w-full text-left pl-1">+${dayTasks.length - 4} more</div>`;
         }
         
-        const isTodayClass = dateStr === todayStr ? 'bg-primary/10 text-primary font-black border-primary/30' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700';
+        const isTodayClass = dateStr === todayStr ? 'bg-primary/5 border-primary/40 shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700';
 
         grid.innerHTML += `
-            <div class="p-3 md:p-4 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-colors ${isTodayClass}" onclick="jumpToDate('${dateStr}')">
-                <span class="text-lg ${dateStr === todayStr ? 'font-black' : 'font-semibold'}">${d}</span>
-                ${indicator}
+            <div class="p-1 md:p-2 rounded-xl border flex flex-col items-start justify-start cursor-pointer transition-colors h-24 md:h-32 overflow-hidden ${isTodayClass}" onclick="jumpToDate('${dateStr}')">
+                <span class="text-sm md:text-base mb-1 ${dateStr === todayStr ? 'text-primary font-black' : 'font-semibold text-gray-500'}">${d}</span>
+                <div class="w-full flex-1 overflow-hidden">
+                    ${taskHTML}
+                </div>
             </div>
         `;
     }
@@ -821,7 +908,6 @@ function renderAnalytics() {
     const efficiency = Math.round((completedTasks / totalTasks) * 100);
     document.getElementById('stat-efficiency').innerText = `${efficiency}%`;
 
-    // Week over Week Logic
     const today = new Date();
     const last7 = getTasksInRange(myTasks, new Date(today.getTime() - 7 * 24*60*60*1000), today);
     const prev7 = getTasksInRange(myTasks, new Date(today.getTime() - 14 * 24*60*60*1000), new Date(today.getTime() - 7 * 24*60*60*1000));
@@ -844,20 +930,17 @@ function renderAnalytics() {
         }
     }
 
-    // Streak Logic (GitHub style graph, last 42 days)
     const streakGraph = document.getElementById('streak-graph');
     streakGraph.innerHTML = '';
     let currentStreak = 0;
     
-    // Check backwards from today
-    for(let i=0; i<100; i++) { // safety limit
+    for(let i=0; i<100; i++) { 
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dayTasks = myTasks.filter(t => t.date === formatDateForInput(d));
         if(dayTasks.some(t => t.status === 'Completed')) {
             currentStreak++;
         } else if (i !== 0) {
-            // Allow 0 task gap today if we haven't worked yet, break otherwise
             break;
         }
     }
@@ -877,7 +960,6 @@ function renderAnalytics() {
         streakGraph.innerHTML += `<div class="w-4 h-4 rounded-sm ${colorClass}" title="${comps} completed on ${d.toLocaleDateString()}"></div>`;
     }
 
-    // Delayed vs Completed Ratio
     const delayCounts = {};
     const compCounts = {};
     userCategories.forEach(c => { delayCounts[c] = 0; compCounts[c] = 0; });
@@ -916,7 +998,6 @@ function renderAnalytics() {
         `;
     });
 
-    // Time Allocation
     const timeSpent = {};
     userCategories.forEach(c => timeSpent[c] = 0);
     let maxTime = 0;
@@ -974,16 +1055,15 @@ function exportData(format) {
 
     if(format === 'json') {
         const dataStr = JSON.stringify(myTasks, null, 2);
-        triggerDownload(dataStr, 'application/json', `omnitrack_export_${currentUser}.json`);
+        triggerDownload(dataStr, 'application/json', `ghadi_export_${currentUser}.json`);
     } else if (format === 'csv') {
-        // Build CSV
         const headers = ['ID', 'Title', 'Date', 'Category', 'StartTime', 'EndTime', 'Status', 'Notes'];
         const rows = myTasks.map(t => {
             const safeNotes = t.notes ? `"${t.notes.replace(/"/g, '""')}"` : '';
             return `${t.id},"${t.title}",${t.date},"${t.category}",${t.startTime},${t.endTime},${t.status},${safeNotes}`;
         });
         const csvContent = [headers.join(','), ...rows].join('\n');
-        triggerDownload(csvContent, 'text/csv', `omnitrack_export_${currentUser}.csv`);
+        triggerDownload(csvContent, 'text/csv', `ghadi_export_${currentUser}.csv`);
     }
 }
 
@@ -999,7 +1079,7 @@ function triggerDownload(content, mimeType, filename) {
     URL.revokeObjectURL(url);
 }
 
-// --- SECRET ADMIN BACKEND ---
+// --- SECRET ADMIN BACKEND ENHANCEMENTS ---
 function handleLogoClick() {
     logoClicks++;
     clearTimeout(logoTimer);
@@ -1032,14 +1112,52 @@ function renderAdminDashboard() {
     const tbody = document.getElementById('admin-user-list');
     tbody.innerHTML = '';
     
-    users.forEach((u, idx) => {
+    users.forEach((u) => {
+        // Deep Telemetry Calculation
+        const uTasks = allTasks.filter(t => t.owner === u.username);
+        
+        let totalHrs = 0;
+        let catMap = {};
+        
+        uTasks.forEach(t => {
+            if(t.status === 'Completed') {
+                const s = new Date(`1970-01-01T${t.startTime}:00Z`);
+                const e = new Date(`1970-01-01T${t.endTime}:00Z`);
+                let diff = (e - s) / 3600000;
+                if(diff < 0) diff += 24;
+                totalHrs += diff;
+            }
+            catMap[t.category] = (catMap[t.category] || 0) + 1;
+        });
+
+        let topCat = "None";
+        let maxCount = 0;
+        for (const [cat, count] of Object.entries(catMap)) {
+            if(count > maxCount) { maxCount = count; topCat = cat; }
+        }
+
+        let userStreak = 0;
+        for(let i=0; i<100; i++) { 
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dtTasks = uTasks.filter(t => t.date === formatDateForInput(d));
+            if(dtTasks.some(t => t.status === 'Completed')) {
+                userStreak++;
+            } else if (i !== 0) {
+                break;
+            }
+        }
+
         tbody.innerHTML += `
             <tr class="hover:bg-purple-800/30 transition-colors">
-                <td class="p-4 font-medium">${u.username}</td>
+                <td class="p-4 font-medium text-purple-100">${u.username}</td>
                 <td class="p-4 font-mono text-purple-400 text-sm opacity-50 hover:opacity-100 transition-opacity">•••••• (Hidden)</td>
+                <td class="p-4 font-bold text-green-400">${totalHrs.toFixed(1)} hrs</td>
+                <td class="p-4 text-sm font-semibold">${topCat}</td>
+                <td class="p-4 font-bold text-orange-400">${userStreak} days</td>
                 <td class="p-4 flex space-x-2">
-                    <button onclick="adminResetPassword('${u.username}')" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-500">Reset Pass</button>
-                    <button onclick="adminDeleteUser('${u.username}')" class="px-3 py-1 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-500">Delete</button>
+                    <button onclick="adminResetPassword('${u.username}')" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-500 shadow-md">Reset Pass</button>
+                    <button onclick="adminDeleteUser('${u.username}')" class="px-3 py-1 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-500 shadow-md">Wipe</button>
                 </td>
             </tr>
         `;
@@ -1059,14 +1177,14 @@ function adminResetPassword(uname) {
 }
 
 function adminDeleteUser(uname) {
-    if(confirm(`WARNING: Deleting user ${uname} will free a slot but destroy their access. Proceed?`)) {
+    if(confirm(`WARNING: Deleting user ${uname} will free a slot but destroy their access and telemetry. Proceed?`)) {
         users = users.filter(u => u.username !== uname);
         localStorage.setItem('omnitrack_users', JSON.stringify(users));
         
-        // Wipe their tasks
         allTasks = allTasks.filter(t => t.owner !== uname);
         localStorage.setItem('omnitrack_tasks', JSON.stringify(allTasks));
         localStorage.removeItem(`omnitrack_categories_${uname}`);
+        localStorage.removeItem(`ghadi_syllabus_${uname}`);
         
         if(currentUser === uname) {
             logoutUser();
@@ -1095,13 +1213,13 @@ function cancelDelete() {
 function executeFinalDelete() {
     const input = document.getElementById('delete-confirm-input').value;
     if (input.trim() === 'DELETE') {
-        // Wipe current user data from arrays
         users = users.filter(u => u.username !== currentUser);
         localStorage.setItem('omnitrack_users', JSON.stringify(users));
         
         allTasks = allTasks.filter(t => t.owner !== currentUser);
         localStorage.setItem('omnitrack_tasks', JSON.stringify(allTasks));
         localStorage.removeItem(`omnitrack_categories_${currentUser}`);
+        localStorage.removeItem(`ghadi_syllabus_${currentUser}`);
         localStorage.removeItem('omnitrack_session_user');
         
         location.reload();
