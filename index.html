@@ -16,13 +16,13 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: '#6366f1',    // Indigo
-                        jee: '#3b82f6',      // Blue
-                        societies: '#a855f7',// Purple
-                        college: '#22c55e',  // Green
-                        personal: '#f97316', // Orange
-                        bgbase: '#0f1115',   // Deep dark
-                        bgpanel: '#16181d'   // Slightly lighter dark
+                        brand: '#6366f1',
+                        jee: '#3b82f6',
+                        societies: '#a855f7',
+                        college: '#22c55e',
+                        personal: '#f97316',
+                        bgbase: '#0f1115',
+                        bgpanel: '#16181d'
                     }
                 }
             }
@@ -31,16 +31,59 @@
 </head>
 <body class="bg-bgbase text-gray-200 font-sans h-screen flex overflow-hidden selection:bg-brand selection:text-white">
 
-    <!-- LOGIN SCREEN (Multi-User) -->
-    <div id="auth-screen" class="fixed inset-0 bg-bgbase z-[100] flex items-center justify-center transition-opacity duration-300">
-        <div class="bg-bgpanel p-8 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-md text-center">
-            <div class="mb-8">
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen" class="fixed inset-0 bg-bgbase/90 backdrop-blur-md z-[100] flex items-center justify-center transition-opacity duration-300 overflow-y-auto py-10">
+        <div class="bg-bgpanel p-8 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-md">
+            <div class="mb-6 text-center">
                 <h1 class="text-3xl font-bold tracking-tight text-white mb-2">OmniTrack</h1>
-                <p class="text-gray-400 text-sm">Sign in to your personal workspace</p>
+                <p class="text-gray-400 text-sm">Secure Personal Workspace</p>
             </div>
+            
+            <!-- Auth Toggle -->
+            <div class="flex p-1 bg-bgbase rounded-lg mb-6 border border-gray-800">
+                <button id="tab-login" onclick="toggleAuth('login')" class="flex-1 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-all shadow-sm">Login</button>
+                <button id="tab-register" onclick="toggleAuth('register')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-all">Register</button>
+            </div>
+
+            <div id="auth-error" class="hidden mb-4 p-3 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400 text-sm text-center font-medium"></div>
+
+            <!-- Login Form -->
             <form id="login-form" class="space-y-4">
-                <input type="text" id="username-input" required placeholder="Enter your username..." class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all">
-                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20">Access Workspace</button>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Username</label>
+                    <input type="text" id="login-username" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Secret Code</label>
+                    <input type="password" id="login-secret" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 mt-2">Access Workspace</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div class="text-xs text-brand font-medium text-center mb-2 bg-brand/10 py-1.5 rounded-md border border-brand/20">
+                    Database Cap: <span id="user-count-display">0</span>/10 Users Registered
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Desired Username</label>
+                    <input type="text" id="reg-username" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Full Name</label>
+                        <input type="text" id="reg-fullname" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Role (e.g. Student)</label>
+                        <input type="text" id="reg-role" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Secret Registration Code</label>
+                    <input type="password" id="reg-secret" required placeholder="Required for access..." class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
+                </div>
+                <button type="submit" class="w-full bg-brand hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 mt-2">Create Account</button>
             </form>
         </div>
     </div>
@@ -51,23 +94,31 @@
             <div class="flex items-center justify-between mb-8">
                 <h1 class="text-xl font-bold tracking-tight text-white">OmniTrack</h1>
             </div>
-            <div class="mb-6 px-3 py-2 bg-bgbase rounded-lg border border-gray-800 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-6 h-6 bg-brand rounded-full flex items-center justify-center text-xs font-bold text-white" id="user-avatar">U</div>
-                    <span id="current-user-display" class="text-sm font-medium text-gray-300 truncate">User</span>
+            <div class="mb-6 px-3 py-3 bg-bgbase rounded-xl border border-gray-800 flex items-center justify-between shadow-inner">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" id="user-avatar">U</div>
+                    <div class="flex flex-col overflow-hidden">
+                        <span id="current-user-display" class="text-sm font-bold text-gray-200 truncate leading-tight">User</span>
+                        <span id="current-user-role" class="text-[10px] font-medium text-gray-500 uppercase tracking-wider truncate">Role</span>
+                    </div>
                 </div>
-                <button onclick="logout()" class="text-gray-500 hover:text-white" title="Logout">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <button onclick="logout()" class="text-gray-500 hover:text-white shrink-0 ml-2" title="Logout">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
             <nav class="space-y-2">
-                <button class="nav-btn active w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium transition-all" onclick="switchTab('calendar', this)">
+                <button class="nav-btn active w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium transition-all bg-gray-800 text-white" onclick="switchTab('calendar', this)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span>Calendar</span>
                 </button>
                 <button class="nav-btn w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all" onclick="switchTab('analytics', this)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     <span>Dashboard</span>
+                </button>
+                <!-- ADMIN ONLY BUTTON -->
+                <button id="nav-admin-btn" class="nav-btn hidden w-full flex items-center space-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all" onclick="switchTab('admin', this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span>Admin Panel</span>
                 </button>
             </nav>
         </div>
@@ -82,8 +133,7 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden relative pb-16 md:pb-0">
         
         <!-- CALENDAR TAB -->
-        <div id="view-calendar" class="flex-1 flex flex-col h-full fade-in">
-            <!-- Header Controls -->
+        <div id="view-calendar" class="flex-1 flex flex-col h-full fade-in block">
             <header class="bg-bgbase border-b border-gray-800 p-4 md:px-8 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
                 <div class="flex items-center space-x-4">
                     <button onclick="navigateDate(-1)" class="p-1.5 rounded-md hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
@@ -103,7 +153,6 @@
                         <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="College">College</button>
                         <button class="filter-btn text-gray-400 hover:text-white px-3 py-1 rounded-md text-xs font-medium" data-filter="Personal">Personal</button>
                     </div>
-                    <!-- View Toggle (Grid/List) -->
                     <div class="flex space-x-1 bg-bgpanel p-1 rounded-lg border border-gray-800">
                         <button id="toggle-list" onclick="setCalendarMode('list')" class="bg-gray-700 text-white p-1 rounded-md" title="Daily List View">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -115,10 +164,7 @@
                 </div>
             </header>
 
-            <!-- Inner Views -->
             <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 bg-bgbase">
-                
-                <!-- Daily List View -->
                 <div id="mode-list" class="max-w-4xl mx-auto w-full">
                     <div id="task-list" class="space-y-3"></div>
                     <div id="empty-state" class="hidden flex-col items-center justify-center mt-32 text-gray-500">
@@ -126,15 +172,11 @@
                         <p class="text-sm font-medium">No tasks scheduled for this day.</p>
                     </div>
                 </div>
-
-                <!-- Monthly Grid View -->
                 <div id="mode-grid" class="hidden max-w-6xl mx-auto w-full h-full flex flex-col">
                     <div class="grid grid-cols-7 gap-px bg-gray-800 mb-px rounded-t-lg overflow-hidden border border-gray-800 text-xs font-semibold text-gray-400 text-center">
                         <div class="bg-bgpanel py-2">Sun</div><div class="bg-bgpanel py-2">Mon</div><div class="bg-bgpanel py-2">Tue</div><div class="bg-bgpanel py-2">Wed</div><div class="bg-bgpanel py-2">Thu</div><div class="bg-bgpanel py-2">Fri</div><div class="bg-bgpanel py-2">Sat</div>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-800 flex-1 border border-t-0 border-gray-800 rounded-b-lg overflow-hidden">
-                        <!-- Grid cells injected via JS -->
-                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-800 flex-1 border border-t-0 border-gray-800 rounded-b-lg overflow-hidden"></div>
                 </div>
             </div>
         </div>
@@ -144,10 +186,8 @@
             <div class="max-w-5xl mx-auto w-full space-y-6">
                 <div>
                     <h2 class="text-2xl font-bold text-white tracking-tight">Analytics & Insights</h2>
-                    <p class="text-sm text-gray-400 mt-1">Comprehensive breakdown of your productivity across categories.</p>
+                    <p class="text-sm text-gray-400 mt-1">Comprehensive breakdown of your productivity.</p>
                 </div>
-                
-                <!-- Top Stats Row -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-bgpanel p-5 rounded-2xl border border-gray-800">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Completion Rate</div>
@@ -166,23 +206,45 @@
                         <div class="text-lg font-bold text-brand mt-2 truncate" id="stat-top-cat">None</div>
                     </div>
                 </div>
-
-                <!-- Detailed Breakdown -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Category Breakdown -->
                     <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
                         <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Performance by Category</h3>
-                        <div id="analytics-categories" class="space-y-5">
-                            <!-- Injected via JS -->
-                        </div>
+                        <div id="analytics-categories" class="space-y-5"></div>
                     </div>
-                    
-                    <!-- Time Allocation vs Success -->
                     <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
                         <h3 class="text-sm font-semibold text-white mb-6 border-b border-gray-800 pb-2">Time Allocation (Hours Logged)</h3>
-                        <div id="analytics-time" class="space-y-5">
-                            <!-- Injected via JS -->
-                        </div>
+                        <div id="analytics-time" class="space-y-5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="view-admin" class="hidden flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 fade-in bg-bgbase">
+            <div class="max-w-5xl mx-auto w-full space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-red-400 tracking-tight">Admin Master Panel</h2>
+                    <p class="text-sm text-gray-400 mt-1">Manage the database limit and view registered users.</p>
+                </div>
+                <div class="bg-bgpanel p-6 rounded-2xl border border-gray-800">
+                    <div class="flex justify-between items-center border-b border-gray-800 pb-4 mb-4">
+                        <h3 class="text-sm font-semibold text-white">Registered Users Database</h3>
+                        <span class="text-xs font-bold bg-gray-800 px-3 py-1 rounded-full text-brand"><span id="admin-user-count">0</span> / 10 Cap</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800">
+                                    <th class="py-3 px-4">Username</th>
+                                    <th class="py-3 px-4">Full Name</th>
+                                    <th class="py-3 px-4">Role</th>
+                                    <th class="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list" class="divide-y divide-gray-800/50">
+                                <!-- Users injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -202,6 +264,11 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             <span class="text-[10px] font-medium">Analytics</span>
         </button>
+        <!-- Mobile Admin button hidden by default -->
+        <button id="mobile-nav-admin" class="mobile-nav-btn hidden flex-col items-center space-y-1 text-red-500" onclick="switchTab('admin', this)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span class="text-[10px] font-medium">Admin</span>
+        </button>
     </nav>
 
     <!-- TASK MODAL -->
@@ -213,15 +280,12 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            
             <form id="task-form" class="p-6 space-y-5">
                 <input type="hidden" id="task-id">
-                
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Title</label>
                     <input type="text" id="task-title" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Date</label>
@@ -237,7 +301,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Start Time</label>
@@ -248,7 +311,6 @@
                         <input type="time" id="task-end" required class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand">
                     </div>
                 </div>
-                
                 <div id="status-container" class="hidden pt-4 border-t border-gray-800">
                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Task Status</label>
                     <select id="task-status" class="w-full bg-bgbase border border-gray-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand appearance-none">
@@ -259,12 +321,10 @@
                         <option value="Abandoned">Abandoned</option>
                     </select>
                 </div>
-
                 <div id="reflection-container" class="hidden">
                     <label class="block text-xs font-semibold text-red-400 uppercase tracking-wider mb-1.5">Reflection (Why did this fail/delay?)</label>
                     <textarea id="task-reflection" rows="2" class="w-full bg-bgbase border border-red-900/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"></textarea>
                 </div>
-
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-transparent border border-gray-700 text-white rounded-xl hover:bg-gray-800 transition-colors text-sm font-medium">Cancel</button>
                     <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 text-sm font-medium">Save Task</button>
