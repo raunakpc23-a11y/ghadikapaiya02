@@ -5,7 +5,7 @@
     --color-primary-hover: 37 99 235;
 }
 
-/* Base custom scrollbar for standard containers */
+/* Base custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -14,22 +14,21 @@
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1; /* slate-300 */
+    background: #cbd5e1;
     border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8; /* slate-400 */
+    background: #94a3b8;
 }
 
-/* Dark mode custom scrollbar */
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #475569; /* slate-600 */
+    background: #475569;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #64748b; /* slate-500 */
+    background: #64748b;
 }
 
-/* Category Accent Borders for the Task Cards (10 Categories) */
+/* Category Accent Borders & Backgrounds */
 .cat-border-jee { border-left-color: #3b82f6 !important; }
 .cat-border-societies { border-left-color: #a855f7 !important; }
 .cat-border-college { border-left-color: #22c55e !important; }
@@ -41,7 +40,19 @@
 .cat-border-trading { border-left-color: #10b981 !important; }
 .cat-border-household { border-left-color: #8b5cf6 !important; }
 
-/* Category Tags (Light & Dark compatible via opacity) */
+/* Calendar Dots bg */
+.cat-bg-jee { background-color: #3b82f6 !important; }
+.cat-bg-societies { background-color: #a855f7 !important; }
+.cat-bg-college { background-color: #22c55e !important; }
+.cat-bg-personal { background-color: #f97316 !important; }
+.cat-bg-school { background-color: #ec4899 !important; }
+.cat-bg-competitive { background-color: #ef4444 !important; }
+.cat-bg-interviews { background-color: #06b6d4 !important; }
+.cat-bg-event { background-color: #f59e0b !important; }
+.cat-bg-trading { background-color: #10b981 !important; }
+.cat-bg-household { background-color: #8b5cf6 !important; }
+
+/* Category Tags */
 .cat-tag-jee { background-color: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
 .cat-tag-societies { background-color: rgba(168, 85, 247, 0.15); color: #9333ea; border: 1px solid rgba(168, 85, 247, 0.3); }
 .cat-tag-college { background-color: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); }
@@ -53,7 +64,7 @@
 .cat-tag-trading { background-color: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
 .cat-tag-household { background-color: rgba(139, 92, 246, 0.15); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.3); }
 
-/* Dark Mode Overrides for Category Tags to pop */
+/* Dark Mode Overrides for Tags */
 .dark .cat-tag-jee { color: #60a5fa; }
 .dark .cat-tag-societies { color: #c084fc; }
 .dark .cat-tag-college { color: #4ade80; }
@@ -65,7 +76,7 @@
 .dark .cat-tag-trading { color: #34d399; }
 .dark .cat-tag-household { color: #a78bfa; }
 
-/* Status Colors for Badges */
+/* Status Colors */
 .status-Pending { color: #9ca3af; } 
 .status-Completed { color: #22c55e; } 
 .status-Partially { color: #eab308; } 
@@ -79,7 +90,20 @@
     cursor: pointer;
 }
 
-/* Ensure padding behind bottom nav bar on mobile */
+/* GitHub Style Streak Grid Colors */
+.streak-level-0 { background-color: #ebedf0; }
+.streak-level-1 { background-color: #9be9a8; }
+.streak-level-2 { background-color: #40c463; }
+.streak-level-3 { background-color: #30a14e; }
+.streak-level-4 { background-color: #216e39; }
+
+.dark .streak-level-0 { background-color: #161b22; }
+.dark .streak-level-1 { background-color: #0e4429; }
+.dark .streak-level-2 { background-color: #006d32; }
+.dark .streak-level-3 { background-color: #26a641; }
+.dark .streak-level-4 { background-color: #39d353; }
+
+/* Mobile Padding Safe Area */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .pb-safe {
         padding-bottom: env(safe-area-inset-bottom);
