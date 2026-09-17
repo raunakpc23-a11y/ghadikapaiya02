@@ -1,88 +1,87 @@
-/* styles.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Color Scheme configurations */
 :root {
-    --accent-ocean: #0ea5e9;
-    --accent-emerald: #10b981;
-    --accent-amethyst: #8b5cf6;
-    --accent-amber: #f59e0b;
-    --primary: var(--accent-ocean);
+    color-scheme: light dark;
+    --color-primary: 59 130 246;
+    --color-primary-hover: 37 99 235;
 }
 
-[data-accent="ocean"] { --primary: var(--accent-ocean); }
-[data-accent="emerald"] { --primary: var(--accent-emerald); }
-[data-accent="amethyst"] { --primary: var(--accent-amethyst); }
-[data-accent="amber"] { --primary: var(--accent-amber); }
-
-.text-accent { color: var(--primary); }
-.bg-accent { background-color: var(--primary); }
-.ring-accent { --tw-ring-color: var(--primary); }
-.border-accent { border-color: var(--primary); }
-
-.glass {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* Base custom scrollbar for standard containers */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1; /* slate-300 */
+    border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; /* slate-400 */
 }
 
-.glass-header, .glass-sidebar {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
+/* Dark mode custom scrollbar */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #475569; /* slate-600 */
 }
-.dark .glass-header, .dark .glass-sidebar {
-    background: rgba(17, 24, 39, 0.7);
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-}
-.animate-slide-up {
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #64748b; /* slate-500 */
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* Category Accent Borders for the Task Cards (10 Categories) */
+.cat-border-jee { border-left-color: #3b82f6 !important; }
+.cat-border-societies { border-left-color: #a855f7 !important; }
+.cat-border-college { border-left-color: #22c55e !important; }
+.cat-border-personal { border-left-color: #f97316 !important; }
+.cat-border-school { border-left-color: #ec4899 !important; }
+.cat-border-competitive { border-left-color: #ef4444 !important; }
+.cat-border-interviews { border-left-color: #06b6d4 !important; }
+.cat-border-event { border-left-color: #f59e0b !important; }
+.cat-border-trading { border-left-color: #10b981 !important; }
+.cat-border-household { border-left-color: #8b5cf6 !important; }
+
+/* Category Tags (Light & Dark compatible via opacity) */
+.cat-tag-jee { background-color: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
+.cat-tag-societies { background-color: rgba(168, 85, 247, 0.15); color: #9333ea; border: 1px solid rgba(168, 85, 247, 0.3); }
+.cat-tag-college { background-color: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); }
+.cat-tag-personal { background-color: rgba(249, 115, 22, 0.15); color: #ea580c; border: 1px solid rgba(249, 115, 22, 0.3); }
+.cat-tag-school { background-color: rgba(236, 72, 153, 0.15); color: #db2777; border: 1px solid rgba(236, 72, 153, 0.3); }
+.cat-tag-competitive { background-color: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+.cat-tag-interviews { background-color: rgba(6, 182, 212, 0.15); color: #0891b2; border: 1px solid rgba(6, 182, 212, 0.3); }
+.cat-tag-event { background-color: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+.cat-tag-trading { background-color: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+.cat-tag-household { background-color: rgba(139, 92, 246, 0.15); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+/* Dark Mode Overrides for Category Tags to pop */
+.dark .cat-tag-jee { color: #60a5fa; }
+.dark .cat-tag-societies { color: #c084fc; }
+.dark .cat-tag-college { color: #4ade80; }
+.dark .cat-tag-personal { color: #fb923c; }
+.dark .cat-tag-school { color: #f472b6; }
+.dark .cat-tag-competitive { color: #f87171; }
+.dark .cat-tag-interviews { color: #22d3ee; }
+.dark .cat-tag-event { color: #fbbf24; }
+.dark .cat-tag-trading { color: #34d399; }
+.dark .cat-tag-household { color: #a78bfa; }
+
+/* Status Colors for Badges */
+.status-Pending { color: #9ca3af; } 
+.status-Completed { color: #22c55e; } 
+.status-Partially { color: #eab308; } 
+.status-Delayed { color: #f97316; } 
+.status-Abandoned { color: #ef4444; } 
+
+/* Fix Input Date/Time Icon colors for dark mode */
+.dark ::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(0.8);
+    opacity: 0.6;
+    cursor: pointer;
 }
 
-.task-card {
-    background: linear-gradient(145deg, rgba(255,255,255,1) 0%, rgba(249,250,251,1) 100%);
-    box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
+/* Ensure padding behind bottom nav bar on mobile */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }
-.dark .task-card {
-    background: linear-gradient(145deg, rgba(31,41,55,1) 0%, rgba(17,24,39,1) 100%);
-    box-shadow: 0 4px 15px -3px rgba(0,0,0,0.3);
-}
-.task-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-}
-.dark .task-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-}
-
-.nav-btn {
-    @apply w-full text-left px-4 py-3 rounded-xl transition-all duration-300 font-medium opacity-70 hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800;
-}
-.nav-btn.active {
-    @apply opacity-100 bg-[var(--primary)] text-white hover:bg-[var(--primary)];
-}
-
-/* Category Badges */
-.cat-jee { border-left-color: #ef4444; color: #ef4444; }
-.cat-societies { border-left-color: #f97316; color: #f97316; }
-.cat-college { border-left-color: #84cc16; color: #84cc16; }
-.cat-personal { border-left-color: #06b6d4; color: #06b6d4; }
-.cat-school { border-left-color: #3b82f6; color: #3b82f6; }
-.cat-competitive { border-left-color: #8b5cf6; color: #8b5cf6; }
-.cat-interviews { border-left-color: #d946ef; color: #d946ef; }
-.cat-event { border-left-color: #f43f5e; color: #f43f5e; }
-.cat-trading { border-left-color: #10b981; color: #10b981; }
-.cat-household { border-left-color: #6b7280; color: #6b7280; }
