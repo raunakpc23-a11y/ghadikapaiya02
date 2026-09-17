@@ -7,8 +7,8 @@
 
 /* Base custom scrollbar for standard containers */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
@@ -27,19 +27,6 @@
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #64748b; /* slate-500 */
-}
-
-/* Focus Mode CSS Overrides */
-body.focus-mode-active #sidebar,
-body.focus-mode-active #main-header,
-body.focus-mode-active #mobile-nav,
-body.focus-mode-active #mobile-add-btn,
-body.focus-mode-active #views-container > div:not(#view-focus) {
-    display: none !important;
-}
-
-body.focus-mode-active #view-focus {
-    display: flex !important;
 }
 
 /* DnD Style modifications */
@@ -74,7 +61,7 @@ body.focus-mode-active #view-focus {
 .cat-tag-trading { background-color: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
 .cat-tag-household { background-color: rgba(139, 92, 246, 0.15); color: #7c3aed; border: 1px solid rgba(139, 92, 246, 0.3); }
 
-/* Dark Mode Overrides for Category Tags to pop */
+/* Dark Mode Overrides for Category Tags */
 .dark .cat-tag-jee { color: #60a5fa; }
 .dark .cat-tag-societies { color: #c084fc; }
 .dark .cat-tag-college { color: #4ade80; }
@@ -93,14 +80,13 @@ body.focus-mode-active #view-focus {
 .status-Delayed { color: #f97316; } 
 .status-Abandoned { color: #ef4444; } 
 
-/* Fix Input Date/Time Icon colors for dark mode */
+/* Input UI Modifications */
 .dark ::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(0.8);
     opacity: 0.6;
     cursor: pointer;
 }
 
-/* Ensure padding behind bottom nav bar on mobile */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .pb-safe {
         padding-bottom: env(safe-area-inset-bottom);
