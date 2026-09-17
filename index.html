@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OmniTrack | Productivity Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_2.css">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -32,20 +32,24 @@
 <body class="bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-white transition-colors duration-300">
 
     <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 flex-col justify-between hidden md:flex shadow-lg z-10">
+    <aside id="main-sidebar" class="w-64 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 flex-col justify-between hidden md:flex shadow-lg z-10 transition-all duration-300">
         <div class="p-6">
-            <h1 class="text-3xl font-extrabold tracking-wider mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">OmniTrack</h1>
+            <h1 id="omni-logo" class="text-3xl font-extrabold tracking-wider mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 cursor-pointer select-none">OmniTrack</h1>
             <nav class="space-y-3">
                 <button id="nav-calendar" class="nav-btn w-full flex items-center space-x-3 text-left py-2.5 px-4 rounded-xl transition-all duration-300 bg-primary text-white shadow-md" onclick="switchTab('calendar')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="font-medium">Calendar Views</span>
+                    <span class="font-medium">Daily Agenda</span>
+                </button>
+                <button id="nav-monthly" class="nav-btn w-full flex items-center space-x-3 text-left py-2.5 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-all duration-300" onclick="switchTab('monthly')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="font-medium">Monthly Calendar</span>
                 </button>
                 <button id="nav-analytics" class="nav-btn w-full flex items-center space-x-3 text-left py-2.5 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-all duration-300" onclick="switchTab('analytics')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     <span class="font-medium">Analytics</span>
                 </button>
                 <button id="nav-settings" class="nav-btn w-full flex items-center space-x-3 text-left py-2.5 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-all duration-300" onclick="switchTab('settings')">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
                     <span class="font-medium">Settings</span>
                 </button>
             </nav>
@@ -71,22 +75,52 @@
                 <h2 id="current-date-display" class="text-lg font-semibold w-36 text-center text-gray-800 dark:text-white">Today</h2>
                 <input type="date" id="date-picker" class="hidden">
                 <button onclick="changeDate(1)" class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors shadow-sm">&rarr;</button>
+                <button onclick="toggleFocusMode()" class="ml-4 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 5a1 1 0 112 0v4.586l2.707 2.707a1 1 0 01-1.414 1.414l-3-3A1 1 0 019 10V5z"></path></svg>
+                    Zen Mode
+                </button>
             </div>
         </header>
 
         <!-- Views Container -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar relative pb-24 md:pb-6">
+        <div id="views-container" class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar relative pb-24 md:pb-6">
             
-            <!-- Calendar View -->
+            <!-- Daily Calendar View -->
             <div id="view-calendar" class="block max-w-5xl mx-auto w-full">
+                <!-- Workload Algorithmic Banner -->
+                <div id="workload-banner" class="hidden mb-6 p-4 rounded-xl bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-800 flex items-center justify-between animate-fade-in-up">
+                    <div class="flex items-center text-orange-800 dark:text-orange-200">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <span id="workload-msg" class="font-semibold text-sm md:text-base">High Intensity Schedule Detected! Consider redistributing tasks to avoid burnout.</span>
+                    </div>
+                </div>
+
                 <div id="task-list" class="space-y-4">
                     <!-- Tasks injected here via JS -->
                 </div>
                 
-                <!-- Empty State -->
                 <div id="empty-state" class="hidden flex-col items-center justify-center mt-24 text-gray-400 dark:text-gray-500">
                     <svg class="w-20 h-20 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                     <p class="text-xl font-medium text-gray-600 dark:text-gray-400">No tasks for this day. Enjoy your free time!</p>
+                </div>
+            </div>
+
+            <!-- Monthly Calendar View -->
+            <div id="view-monthly" class="hidden max-w-5xl mx-auto w-full animate-fade-in-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="month-title" class="text-3xl font-bold text-gray-800 dark:text-white">Month Year</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="changeMonth(-1)" class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">&larr;</button>
+                        <button onclick="changeMonth(1)" class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">&rarr;</button>
+                    </div>
+                </div>
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 overflow-x-auto">
+                    <div class="grid grid-cols-7 gap-2 min-w-[600px] mb-2 text-center font-bold text-gray-500 dark:text-gray-400">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div id="month-grid" class="grid grid-cols-7 gap-2 min-w-[600px] auto-rows-fr">
+                        <!-- Days injected via JS -->
+                    </div>
                 </div>
             </div>
 
@@ -95,32 +129,40 @@
                 <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Dashboard & Analytics</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
+                    <!-- Efficiency & WOW Trend -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
                         <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Efficiency</h3>
-                        <div class="flex items-end space-x-2">
+                        <div class="flex items-end space-x-2 mb-2">
                             <span id="stat-efficiency" class="text-5xl font-black text-primary">0%</span>
-                            <span class="text-gray-500 dark:text-gray-400 mb-1 font-medium">completed</span>
+                            <span class="text-gray-500 font-medium mb-1">completed</span>
                         </div>
+                        <p id="wow-trend" class="text-sm font-semibold text-green-500 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            +0% vs last week
+                        </p>
                     </div>
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Delay Insights</h3>
-                        <div class="flex items-end space-x-2">
-                            <span id="stat-delayed" class="text-2xl font-bold text-red-500 dark:text-red-400">None</span>
+                    <!-- Streak Tracker -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg md:col-span-2 overflow-x-auto">
+                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-4">Productivity Streak</h3>
+                        <div id="streak-grid" class="flex gap-1">
+                            <!-- Streak boxes injected via JS -->
                         </div>
-                        <p class="text-sm text-gray-400 mt-2 font-medium">Category with most delays</p>
-                    </div>
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Tasks Logged</h3>
-                        <div class="flex items-end space-x-2">
-                            <span id="stat-total" class="text-5xl font-black text-gray-800 dark:text-white">0</span>
-                        </div>
+                        <p class="text-sm text-gray-500 mt-3 font-medium">Current Streak: <span id="current-streak-text" class="text-primary font-bold">0 Days</span></p>
                     </div>
                 </div>
 
-                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg mb-8">
-                    <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Time Allocation (Hours Spent)</h3>
-                    <div id="time-allocation-bars" class="space-y-5">
-                        <!-- Progress bars injected via JS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Time Allocation (Hours Spent)</h3>
+                        <div id="time-allocation-bars" class="space-y-5">
+                            <!-- Progress bars -->
+                        </div>
+                    </div>
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Delayed vs Completed Ratio</h3>
+                        <div id="ratio-bars" class="space-y-5">
+                            <!-- Ratio bars injected via JS -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,7 +202,16 @@
                     </div>
                 </div>
 
-                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-8 rounded-2xl border border-red-200 dark:border-red-900 shadow-lg">
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg mb-8">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">Data Sovereignty & Backups</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 font-medium">Export your historical task data directly to your device. You own your data.</p>
+                    <div class="flex space-x-4">
+                        <button onclick="exportData('csv')" class="px-5 py-2.5 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors shadow-md">Export to CSV</button>
+                        <button onclick="exportData('json')" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-md">Export to JSON</button>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-8 rounded-2xl border border-red-200 dark:border-red-900 shadow-lg mb-8">
                     <h3 class="text-xl font-bold mb-2 text-red-600 dark:text-red-400">Danger Zone</h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-6 font-medium">Once you delete your account, there is no going back. Please be certain.</p>
                     <div class="flex space-x-4">
@@ -169,58 +220,109 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Admin Dashboard View (Secret) -->
+            <div id="view-admin" class="hidden max-w-4xl mx-auto w-full animate-fade-in-up">
+                <div class="bg-red-600 p-6 rounded-t-2xl flex justify-between items-center">
+                    <h2 class="text-3xl font-black text-white tracking-widest">Backend Handler (ADMIN)</h2>
+                    <button onclick="closeAdmin()" class="text-white bg-red-800 px-4 py-2 rounded-lg font-bold hover:bg-red-900">Exit Admin</button>
+                </div>
+                <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6 rounded-b-2xl shadow-2xl">
+                    <p class="text-gray-600 dark:text-gray-400 font-medium mb-6">Manage all registered accounts. System is capped at 10 users max.</p>
+                    <div class="flex justify-between mb-4">
+                        <span class="font-bold text-lg dark:text-white">Current Capacity: <span id="admin-capacity" class="text-primary">0/10</span></span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                    <th class="p-3 font-bold dark:text-white">Username</th>
+                                    <th class="p-3 font-bold dark:text-white">Task Count</th>
+                                    <th class="p-3 font-bold dark:text-white text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
+
+        <!-- Focus/Zen Mode Overlay -->
+        <div id="focus-overlay" class="fixed inset-0 bg-white dark:bg-gray-900 z-[60] hidden flex-col items-center justify-center p-6 animate-fade-in-up">
+            <button onclick="toggleFocusMode()" class="absolute top-6 right-6 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="focus-task-container" class="text-center w-full max-w-2xl">
+                <h3 class="text-xl font-bold uppercase tracking-widest text-primary mb-4">Current Focus Object</h3>
+                <h1 id="focus-task-title" class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-8 leading-tight">No Pending Tasks!</h1>
+                
+                <div id="focus-timer-display" class="text-8xl font-black text-gray-800 dark:text-gray-200 font-mono mb-12 tabular-nums">25:00</div>
+                
+                <div class="flex flex-col md:flex-row justify-center gap-4">
+                    <button id="focus-timer-btn" onclick="togglePomodoro()" class="px-8 py-4 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white font-bold rounded-2xl hover:bg-gray-300 dark:hover:bg-gray-700 transition-all text-xl">Start Timer</button>
+                    <button id="focus-complete-btn" onclick="completeFocusTask()" class="px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primaryHover shadow-xl transition-all text-xl hidden">Mark Complete</button>
+                </div>
+            </div>
+        </div>
+
     </main>
-
-    <!-- Mobile Navigation Bottom Bar -->
-    <nav class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 flex justify-around p-3 z-40 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <button id="mob-nav-calendar" onclick="switchTab('calendar')" class="mob-nav-btn flex flex-col items-center p-2 text-primary">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="text-[10px] font-bold">Calendar</span>
-        </button>
-        <button id="mob-nav-analytics" onclick="switchTab('analytics')" class="mob-nav-btn flex flex-col items-center p-2 text-gray-500 dark:text-gray-400">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            <span class="text-[10px] font-bold">Analytics</span>
-        </button>
-        <button id="mob-nav-settings" onclick="switchTab('settings')" class="mob-nav-btn flex flex-col items-center p-2 text-gray-500 dark:text-gray-400">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-            <span class="text-[10px] font-bold">Settings</span>
-        </button>
-    </nav>
-
-    <!-- Mobile Floating Add Button -->
-    <button onclick="openModal()" class="md:hidden fixed bottom-20 right-6 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-[0_8px_16px_rgba(0,0,0,0.3)] text-white text-3xl z-30 transition-transform active:scale-95">
-        +
-    </button>
 
     <!-- Modal Overlays -->
 
-    <!-- Login Modal -->
+    <!-- Login / Register Modal -->
     <div id="login-modal" class="fixed inset-0 bg-black/50 dark:bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-transform">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-transform relative">
+            
+            <div id="auth-logo-trigger" class="absolute top-4 left-4 w-10 h-10 cursor-pointer rounded-full" onclick="handleSecretAdminClick()"></div>
+
             <div class="p-8 text-center border-b border-gray-100 dark:border-gray-800">
-                <h2 class="text-3xl font-extrabold text-primary mb-2">OmniTrack</h2>
-                <p class="text-gray-500 dark:text-gray-400 font-medium">Log in to manage your productivity</p>
+                <h2 class="text-3xl font-extrabold text-primary mb-2 select-none">OmniTrack</h2>
+                <div class="flex justify-center space-x-4 mt-4 text-sm font-bold border-b border-gray-200 dark:border-gray-700">
+                    <button id="tab-login" class="pb-2 border-b-2 border-primary text-primary" onclick="setAuthMode('login')">Login</button>
+                    <button id="tab-register" class="pb-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400" onclick="setAuthMode('register')">Register</button>
+                </div>
             </div>
-            <form id="login-form" class="p-8 space-y-5">
+            
+            <form id="auth-form" class="p-8 space-y-5">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-                    <input type="email" id="login-email" required placeholder="you@example.com" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                    <input type="text" id="auth-username" required placeholder="productivity_ninja" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Password</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="login-remember" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:bg-gray-700 dark:border-gray-600">
-                    <label for="login-remember" class="ml-2 text-sm font-medium text-gray-600 dark:text-gray-400">Remember Me</label>
+                <div id="auth-site-code-group" class="hidden">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Site Access Code</label>
+                    <input type="password" id="auth-site-code" placeholder="Required for registration" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <button type="submit" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primaryHover shadow-lg hover:shadow-primary/50 transition-all duration-300">Access Account</button>
+                
+                <div id="capacity-warning" class="hidden p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-bold rounded-lg text-center">
+                    System Capacity Reached (10/10). Registration closed.
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primaryHover shadow-lg hover:shadow-primary/50 transition-all duration-300">Log In</button>
             </form>
         </div>
     </div>
 
-    <!-- Category Onboarding Modal -->
+    <!-- Secret Admin Code Modal -->
+    <div id="admin-pass-modal" class="fixed inset-0 bg-black/80 z-[150] hidden flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm border border-red-500 overflow-hidden p-8 text-center">
+            <h3 class="text-xl font-bold text-red-500 mb-4">Admin Authentication</h3>
+            <input type="password" id="admin-passcode-input" class="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 mb-4 text-center" placeholder="Passcode">
+            <div class="flex space-x-2">
+                <button onclick="document.getElementById('admin-pass-modal').classList.add('hidden')" class="flex-1 py-2 bg-gray-700 text-white rounded-lg">Cancel</button>
+                <button onclick="verifyAdminPass()" class="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold">Access</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Onboarding Modal (unchanged except logic in js) -->
     <div id="onboarding-modal" class="fixed inset-0 bg-black/50 dark:bg-black/80 hidden z-[90] flex items-center justify-center p-4 backdrop-blur-md transition-opacity">
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
@@ -228,9 +330,7 @@
                 <p class="text-gray-500 dark:text-gray-400 mt-1">Choose the categories that matter most to your schedule.</p>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar">
-                <div id="onboarding-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Checkboxes injected via JS -->
-                </div>
+                <div id="onboarding-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
             <div class="p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-end">
                 <button onclick="saveCategories()" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primaryHover shadow-lg transition-all duration-300">Complete Setup</button>
@@ -238,12 +338,12 @@
         </div>
     </div>
 
-    <!-- Task Injection / Edit Modal -->
+    <!-- Task Injection Modal (Added Recurrence) -->
     <div id="task-modal" class="fixed inset-0 bg-black/40 dark:bg-black/70 hidden z-[80] flex items-center justify-center px-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-700 overflow-hidden transform scale-100">
             <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
                 <h3 id="modal-title" class="text-xl font-extrabold text-gray-900 dark:text-white">Add New Task</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -263,9 +363,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">Category</label>
-                        <select id="task-category" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
-                            <!-- Options injected via JS based on selected categories -->
-                        </select>
+                        <select id="task-category" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"></select>
                     </div>
                 </div>
 
@@ -278,6 +376,16 @@
                         <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">End Time</label>
                         <input type="time" id="task-end" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
                     </div>
+                </div>
+
+                <div id="recurrence-container">
+                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">Recurrence (Rolling 3 Months)</label>
+                    <select id="task-recurrence" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
+                        <option value="none">None (One-time)</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="weekdays">Weekdays Only</option>
+                    </select>
                 </div>
                 
                 <div id="status-container" class="hidden pt-3 border-t border-gray-200 dark:border-gray-700">
@@ -299,7 +407,8 @@
         </div>
     </div>
 
-    <!-- Task Details & Notes Modal (Dedicated Notes Window) -->
+    <!-- Notes Modal, Account Deletion Modals remain same as previous structure -->
+    <!-- (Included for completeness but unchanged structurally) -->
     <div id="notes-modal" class="fixed inset-0 bg-black/40 dark:bg-black/70 hidden z-[85] flex items-center justify-center p-4 md:p-6 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-[85vh] md:h-[75vh]">
             <div class="p-5 md:p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-between items-start rounded-t-2xl">
@@ -308,59 +417,41 @@
                         <span id="note-cat-tag" class="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Category</span>
                         <span id="note-status" class="text-sm font-bold">• Status</span>
                     </div>
-                    <h3 id="note-title" class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">Task Title Here</h3>
-                    <p id="note-time" class="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        10:00 AM - 11:30 AM
-                    </p>
+                    <h3 id="note-title" class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">Title</h3>
                 </div>
-                <button onclick="closeNotes()" class="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 transition-colors">
+                <button onclick="closeNotes()" class="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            
             <div class="flex-1 p-5 md:p-6 flex flex-col bg-white dark:bg-gray-800">
-                <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wide flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    Personal Notes & Reflections
-                </label>
-                <textarea id="task-notes-input" class="flex-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary custom-scrollbar resize-none text-base md:text-lg leading-relaxed placeholder-gray-400 dark:placeholder-gray-600" placeholder="Jot down details, outcomes, or reasons for delay here..."></textarea>
+                <textarea id="task-notes-input" class="flex-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-5 py-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary custom-scrollbar resize-none" placeholder="Notes..."></textarea>
             </div>
-
             <div class="p-5 md:p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-end space-x-3 rounded-b-2xl">
-                <button type="button" onclick="closeNotes()" class="px-6 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-semibold rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Discard</button>
-                <button type="button" onclick="saveNotes()" class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primaryHover shadow-lg transition-all">Save Notes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Account Deletion Modals -->
-    <!-- Modal 1: Confirmation -->
-    <div id="delete-modal-1" class="fixed inset-0 bg-black/60 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-700 overflow-hidden text-center p-8">
-            <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Are you sure?</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6 font-medium">Are you sure you want to delete all tasks and account data? This action is irreversible.</p>
-            <div class="flex flex-col space-y-3">
-                <button onclick="proceedDeleteStep2()" class="w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-md">Yes, proceed</button>
-                <button onclick="cancelDelete()" class="w-full py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-bold rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+                <button type="button" onclick="closeNotes()" class="px-6 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-semibold rounded-xl">Discard</button>
+                <button type="button" onclick="saveNotes()" class="px-6 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg">Save Notes</button>
             </div>
         </div>
     </div>
     
-    <!-- Modal 2: Final Validation -->
+    <div id="delete-modal-1" class="fixed inset-0 bg-black/60 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-sm text-center">
+            <h3 class="text-2xl font-bold mb-6">Are you sure?</h3>
+            <button onclick="proceedDeleteStep2()" class="w-full py-3 bg-red-600 text-white font-bold rounded-xl mb-3">Yes, proceed</button>
+            <button onclick="cancelDelete()" class="w-full py-3 bg-gray-200 dark:bg-gray-700 font-bold rounded-xl">Cancel</button>
+        </div>
+    </div>
     <div id="delete-modal-2" class="fixed inset-0 bg-black/70 z-[120] hidden flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md border border-red-200 dark:border-red-900 overflow-hidden p-8">
-            <h3 class="text-2xl font-bold text-red-600 dark:text-red-500 mb-3">Final Warning</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4 font-medium">To confirm deletion, please type <strong class="text-gray-900 dark:text-white font-black">DELETE</strong> below.</p>
-            <input type="text" id="delete-confirm-input" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-center text-xl font-black text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 mb-6 uppercase">
-            <div class="flex justify-between space-x-4">
-                <button onclick="cancelDelete()" class="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white font-bold rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-                <button onclick="executeFinalDelete()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-md transition-colors">Confirm Delete</button>
+        <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md">
+            <h3 class="text-2xl font-bold text-red-600 mb-3">Final Warning</h3>
+            <p class="mb-4">Type <strong class="font-black">DELETE</strong> below.</p>
+            <input type="text" id="delete-confirm-input" class="w-full bg-gray-50 dark:bg-gray-800 border rounded-xl px-4 py-3 mb-6 uppercase">
+            <div class="flex space-x-4">
+                <button onclick="cancelDelete()" class="flex-1 py-3 bg-gray-200 dark:bg-gray-700 font-bold rounded-xl">Cancel</button>
+                <button onclick="executeFinalDelete()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl">Confirm</button>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script_2.js"></script>
 </body>
 </html>
