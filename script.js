@@ -275,7 +275,7 @@ function refreshCalendarView() {
         
         filteredTasks.forEach((task, index) => {
             const catStyle = MASTER_CATEGORIES[task.category] || MASTER_CATEGORIES["Personal"];
-            const timeStr = `${formatAmPm(task.startTime)} - ${formatAmPm(task.endTime)}`;
+            const timeStr = `${formatAmPm(task.startTime)} -${formatAmPm(task.endTime)}`;
             const statusClass = `status-text-${task.status.split(' ')[0]}`;
             const stagger = `stagger-${(index%4)+1}`;
 
@@ -285,7 +285,7 @@ function refreshCalendarView() {
             card.innerHTML = `
                 <div class="flex-1 cursor-pointer pr-4" onclick="openNotesModal('${task.id}')">
                     <div class="flex items-center space-x-3 mb-2">
-                        <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${catStyle.color} ${catStyle.bg} border ${catStyle.border}">${Here is the complete, upgraded codebase for the OmniTrack application, implementing all 7 features including the centralized authentication, mobile-responsive bottom navigation, multi-step account deletion, and dynamic theme/accent engines.
+                        <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${catStyle.color}${catStyle.bg} border ${catStyle.border}">${Here is the complete, upgraded codebase for the OmniTrack application, implementing all 7 features including the centralized authentication, mobile-responsive bottom navigation, multi-step account deletion, and dynamic theme/accent engines.
 
 ### `index.html`
 ```html
@@ -513,4 +513,17 @@ function refreshCalendarView() {
 
     <!-- Delete Confirm Step 2 -->
     <div id="delete-step2-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-full
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-xl font-bold mb-2 text-red-500">Final Confirmation</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Type <strong class="text-gray-900 dark:text-white select-none">DELETE</strong> below to permanently erase your account.</p>
+            <input type="text" id="delete-confirm-input" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-red-200 dark:border-red-900 focus:ring-2 focus:ring-red-500 outline-none mb-4 text-center font-mono">
+            <div class="flex gap-3">
+                <button onclick="closeModal('delete-step2-modal')" class="flex-1 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 transition-all">Cancel</button>
+                <button onclick="executeAccountDeletion()" class="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white transition-all font-bold disabled:opacity-50" id="final-delete-btn" disabled>Purge Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
