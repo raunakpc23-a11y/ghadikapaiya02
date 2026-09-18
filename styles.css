@@ -3,6 +3,30 @@
     color-scheme: light dark;
     --color-primary: 59 130 246;
     --color-primary-hover: 37 99 235;
+    
+    /* Background overrides for Advanced Theming */
+    --bg-light-hex: #f8fafc;
+    --bg-dark-hex: #1f2937;
+}
+
+/* Dynamic Background Handler */
+body.dynamic-bg {
+    background: var(--bg-light-hex) !important;
+}
+.dark body.dynamic-bg {
+    background: var(--bg-dark-hex) !important;
+}
+
+/* Playful Mode Styles */
+.playful-mode #timer-wrapper {
+    background: linear-gradient(135deg, rgba(255, 182, 193, 0.2), rgba(255, 255, 224, 0.2), rgba(173, 216, 230, 0.2));
+    border-color: rgba(236, 72, 153, 0.4) !important;
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.2);
+}
+.playful-mode #focus-timer-display {
+    background: -webkit-linear-gradient(45deg, #ec4899, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Base custom scrollbar for standard containers */
