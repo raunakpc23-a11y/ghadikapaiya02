@@ -17,7 +17,8 @@
                     },
                     animation: {
                         'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 4s linear infinite',
                     },
                     keyframes: {
                         fadeInUp: {
@@ -30,7 +31,10 @@
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-white transition-colors duration-300">
+<body class="text-gray-900 dark:text-gray-100 font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-white transition-colors duration-300 dynamic-bg">
+
+    <!-- Confetti Canvas overlay -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-[200]"></canvas>
 
     <!-- Sidebar Navigation -->
     <aside class="w-64 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 flex-col justify-between hidden md:flex shadow-lg z-10 transition-all duration-300" id="sidebar">
@@ -102,11 +106,20 @@
             
             <!-- Focus Mode Module -->
             <div id="view-focus" class="hidden h-full flex-col items-center justify-center animate-fade-in-up pb-10">
-                <div class="text-center w-full max-w-3xl bg-white/50 dark:bg-black/20 p-8 md:p-12 rounded-3xl backdrop-blur-md border border-gray-200 dark:border-white/10 shadow-2xl">
-                    <h2 class="text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase mb-4">Pomodoro Focus Zone</h2>
+                <div id="focus-ui-container" class="text-center w-full max-w-3xl bg-white/50 dark:bg-black/20 p-8 md:p-12 rounded-3xl backdrop-blur-md border border-gray-200 dark:border-white/10 shadow-2xl transition-all duration-500 relative overflow-hidden">
+                    
+                    <div class="absolute top-4 right-6 flex items-center space-x-2">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Playful Mode</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="playful-mode-toggle" class="sr-only peer" onchange="togglePlayfulMode()">
+                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+
+                    <h2 class="text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase mb-4 z-10 relative">Pomodoro Focus Zone</h2>
                     
                     <!-- Task Linker -->
-                    <div class="mb-8 max-w-lg mx-auto">
+                    <div class="mb-8 max-w-lg mx-auto z-10 relative">
                         <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2">Target Task:</label>
                         <select id="focus-task-select" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
                             <option value="">Select a task...</option>
@@ -115,17 +128,17 @@
                     </div>
                     
                     <!-- Timer -->
-                    <div class="relative w-64 h-64 mx-auto mb-10 flex items-center justify-center rounded-full border-8 border-primary/20 shadow-inner bg-white dark:bg-gray-800/50">
+                    <div id="timer-wrapper" class="relative w-64 h-64 mx-auto mb-10 flex items-center justify-center rounded-full border-8 border-primary/20 shadow-inner bg-white dark:bg-gray-800/50 z-10 transition-all duration-500">
                         <svg class="absolute inset-0 w-full h-full -rotate-90">
-                            <circle cx="120" cy="120" r="116" class="stroke-current text-primary" stroke-width="8" fill="none" id="focus-timer-ring" stroke-dasharray="728" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s linear;"></circle>
+                            <circle cx="120" cy="120" r="116" class="stroke-current text-primary transition-colors duration-500" stroke-width="8" fill="none" id="focus-timer-ring" stroke-dasharray="728" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s linear;"></circle>
                         </svg>
-                        <div class="text-center">
-                            <span id="focus-timer-display" class="text-6xl font-black text-primary block leading-none">25:00</span>
-                            <span id="focus-state-label" class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-2 block">Work Session</span>
+                        <div class="text-center z-20">
+                            <span id="focus-timer-display" class="text-6xl font-black text-primary block leading-none transition-colors duration-500">25:00</span>
+                            <span id="focus-state-label" class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-2 block transition-colors duration-500">Work Session</span>
                         </div>
                     </div>
 
-                    <div class="flex justify-center flex-wrap gap-4">
+                    <div class="flex justify-center flex-wrap gap-4 z-10 relative">
                         <button id="focus-start-btn" onclick="togglePomodoro()" class="px-8 py-4 bg-gray-800 dark:bg-gray-700 text-white font-bold rounded-2xl hover:bg-gray-900 dark:hover:bg-gray-600 transition-all text-lg shadow-lg">Start Timer</button>
                         <button onclick="resetPomodoro()" class="px-8 py-4 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white font-bold rounded-2xl hover:bg-gray-300 dark:hover:bg-gray-700 transition-all text-lg border border-gray-300 dark:border-gray-600">Reset</button>
                         <button onclick="markFocusTaskComplete()" class="px-8 py-4 bg-green-500 text-white font-bold rounded-2xl hover:bg-green-600 transition-all text-lg shadow-[0_0_20px_rgba(34,197,94,0.4)]">Mark Done</button>
@@ -139,7 +152,7 @@
                     <h2 class="text-3xl font-bold text-gray-800 dark:text-white">Syllabus Tracker</h2>
                     <span class="text-sm font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">Track Mastery</span>
                 </div>
-                <div id="syllabus-container" class="space-y-4">
+                <div id="syllabus-container" class="space-y-4 pb-10">
                     <!-- Accordions Injected via JS -->
                 </div>
             </div>
@@ -189,31 +202,55 @@
             <div id="view-analytics" class="hidden max-w-5xl mx-auto w-full animate-fade-in-up">
                 <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Dashboard & Analytics</h2>
                 
-                <!-- Main Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Efficiency</h3>
-                        <div class="flex items-end space-x-2">
-                            <span id="stat-efficiency" class="text-5xl font-black text-primary">0%</span>
-                        </div>
-                        <p id="wow-trend" class="text-sm mt-2 font-medium text-green-500 flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg> 0% vs last week</p>
+                <!-- Advanced Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Efficiency -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Total Efficiency</h3>
+                        <div class="flex items-end space-x-2"><span id="stat-efficiency" class="text-4xl font-black text-primary">0%</span></div>
+                        <p id="wow-trend" class="text-xs mt-2 font-medium text-green-500 flex items-center">-</p>
                     </div>
                     
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow flex flex-col justify-center">
-                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-3">Productivity Streak</h3>
+                    <!-- Velocity Score -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Velocity Score</h3>
+                        <div class="flex items-end space-x-2"><span id="stat-velocity" class="text-4xl font-black text-blue-500">0</span></div>
+                        <p class="text-xs mt-2 font-medium text-gray-500">Tasks completed (7 days)</p>
+                    </div>
+
+                    <!-- Estimation Accuracy -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Estimation Accuracy</h3>
+                        <div class="flex items-end space-x-2"><span id="stat-estimation" class="text-4xl font-black text-purple-500">N/A</span></div>
+                        <p class="text-xs mt-2 font-medium text-gray-500">Scheduled vs Actual Time</p>
+                    </div>
+
+                    <!-- Burnout Index -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg relative overflow-hidden">
+                        <h3 class="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider mb-2 z-10 relative">Burnout Index</h3>
+                        <div class="flex items-end space-x-2 z-10 relative"><span id="stat-burnout" class="text-4xl font-black text-gray-800 dark:text-white">0%</span></div>
+                        <p class="text-xs mt-2 font-medium text-gray-500 z-10 relative">Abandonment Rate (7 days)</p>
+                        <div id="burnout-bg" class="absolute bottom-0 left-0 w-full h-2 bg-green-500 transition-colors"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Peak Productivity Heatmap -->
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
+                        <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Peak Productivity Heatmap</h3>
+                        <div id="heatmap-container" class="grid grid-cols-2 gap-4">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg flex flex-col justify-center">
+                        <h3 class="text-xl font-bold mb-4 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Productivity Streak</h3>
                         <div class="flex items-baseline space-x-2 mb-3">
                             <span id="current-streak" class="text-4xl font-black text-orange-500">0</span>
                             <span class="text-gray-500 font-medium">Days</span>
                         </div>
-                        <div id="streak-graph" class="flex flex-wrap gap-1">
+                        <div id="streak-graph" class="flex flex-wrap gap-1 mt-2">
                             <!-- GitHub style squares injected here -->
-                        </div>
-                    </div>
-
-                    <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Tasks Logged</h3>
-                        <div class="flex items-end space-x-2 mt-4">
-                            <span id="stat-total" class="text-5xl font-black text-gray-800 dark:text-white">0</span>
                         </div>
                     </div>
                 </div>
@@ -222,7 +259,7 @@
                     <!-- Ratio Visualizer -->
                     <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
                         <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Delayed vs Completed Ratio</h3>
-                        <div id="ratio-container" class="space-y-4">
+                        <div id="ratio-container" class="space-y-4 custom-scrollbar max-h-64 overflow-y-auto pr-2">
                             <!-- CSS Grid visualizer injected via JS -->
                         </div>
                     </div>
@@ -230,7 +267,7 @@
                     <!-- Time Allocation -->
                     <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg">
                         <h3 class="text-xl font-bold mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 text-gray-800 dark:text-white">Time Allocation (Hours)</h3>
-                        <div id="time-allocation-bars" class="space-y-5">
+                        <div id="time-allocation-bars" class="space-y-5 custom-scrollbar max-h-64 overflow-y-auto pr-2">
                             <!-- Progress bars injected via JS -->
                         </div>
                     </div>
@@ -238,11 +275,12 @@
             </div>
 
             <!-- Settings View -->
-            <div id="view-settings" class="hidden max-w-4xl mx-auto w-full animate-fade-in-up">
+            <div id="view-settings" class="hidden max-w-4xl mx-auto w-full animate-fade-in-up pb-10">
                 <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Account Settings</h2>
                 
                 <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg mb-8">
                     <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">Appearance & Theme</h3>
+                    
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wider">Light / Dark Mode</label>
                         <div class="flex space-x-4">
@@ -251,6 +289,28 @@
                             <button onclick="setTheme('system')" class="theme-btn px-6 py-2 rounded-lg font-medium border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-theme="system">System</button>
                         </div>
                     </div>
+
+                    <!-- Luminosity & Contrast Sliders -->
+                    <div class="mb-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase">Background Contrast Tuning</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="flex justify-between text-xs font-semibold text-gray-500 mb-2">
+                                    <span>Light Mode Luminosity (Warm to Harsh)</span>
+                                    <span id="light-lum-val">#f8fafc</span>
+                                </label>
+                                <input type="range" id="light-luminosity" min="240" max="255" value="248" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-xs font-semibold text-gray-500 mb-2">
+                                    <span>Dark Mode Luminosity (Slate to OLED)</span>
+                                    <span id="dark-lum-val">#1f2937</span>
+                                </label>
+                                <input type="range" id="dark-luminosity" min="0" max="51" value="31" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wider">Primary Accent</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -270,7 +330,7 @@
                     </div>
                 </div>
 
-                <!-- Data Management (Export/Backup) -->
+                <!-- Data Management -->
                 <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-8 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg mb-8">
                     <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Data Management & Backup</h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-6 font-medium">Download your complete history of tasks, notes, and productivity reflections.</p>
@@ -295,32 +355,62 @@
             </div>
 
             <!-- Expanded Admin Dashboard View -->
-            <div id="view-admin" class="hidden max-w-6xl mx-auto w-full animate-fade-in-up">
+            <div id="view-admin" class="hidden max-w-6xl mx-auto w-full animate-fade-in-up pb-10">
                 <div class="bg-purple-900 p-8 rounded-2xl shadow-2xl border border-purple-700 text-white">
                     <div class="flex justify-between items-center mb-6 border-b border-purple-700 pb-4">
                         <h2 class="text-3xl font-black text-purple-200">Ghadi Ka Pahiya Admin Override</h2>
                         <span class="bg-purple-800 px-4 py-1 rounded-full text-sm font-bold border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]">System Override Active</span>
                     </div>
-                    <p class="mb-6 text-purple-300 font-medium">Manage telemetry and server limits. Capacity strictly capped at 10 active slots.</p>
                     
-                    <div class="bg-purple-950 rounded-xl overflow-x-auto shadow-inner border border-purple-800">
-                        <table class="w-full text-left min-w-max">
-                            <thead class="bg-purple-900/50 border-b border-purple-800">
-                                <tr>
-                                    <th class="p-4 font-bold text-purple-200">Username</th>
-                                    <th class="p-4 font-bold text-purple-200">Password</th>
-                                    <th class="p-4 font-bold text-purple-200">Logged Hrs</th>
-                                    <th class="p-4 font-bold text-purple-200">Top Category</th>
-                                    <th class="p-4 font-bold text-purple-200">Daily Streak</th>
-                                    <th class="p-4 font-bold text-purple-200">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-user-list" class="divide-y divide-purple-800">
-                                <!-- Users injected via JS -->
-                            </tbody>
-                        </table>
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                        <div class="xl:col-span-2 bg-purple-950 rounded-xl overflow-x-auto shadow-inner border border-purple-800">
+                            <table class="w-full text-left min-w-max">
+                                <thead class="bg-purple-900/50 border-b border-purple-800">
+                                    <tr>
+                                        <th class="p-4 font-bold text-purple-200">Username</th>
+                                        <th class="p-4 font-bold text-purple-200">Password</th>
+                                        <th class="p-4 font-bold text-purple-200">Logged Hrs</th>
+                                        <th class="p-4 font-bold text-purple-200">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-user-list" class="divide-y divide-purple-800">
+                                    <!-- Users injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- System Logger Terminal -->
+                        <div class="bg-black rounded-xl border border-purple-700 shadow-inner flex flex-col h-64 xl:h-auto">
+                            <div class="bg-purple-900 px-4 py-2 border-b border-purple-700 flex justify-between items-center">
+                                <span class="text-xs font-mono font-bold text-purple-300">SYSTEM_EVENT_LOG</span>
+                                <button onclick="clearSysLogs()" class="text-xs text-purple-400 hover:text-white uppercase">Clear</button>
+                            </div>
+                            <div id="admin-sys-logger" class="flex-1 p-4 font-mono text-[10px] md:text-xs text-green-400 overflow-y-auto custom-scrollbar space-y-1">
+                                <!-- Logs injected via JS -->
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="switchTab('calendar')" class="mt-8 px-8 py-3 bg-purple-700 hover:bg-purple-600 font-bold rounded-xl transition-colors text-white shadow-lg border border-purple-500">Exit Admin Mode</button>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Raw State Inspector -->
+                        <div class="bg-purple-950 p-4 rounded-xl border border-purple-800">
+                            <h3 class="font-bold text-purple-300 mb-2 uppercase text-sm">Raw State Inspector (JSON)</h3>
+                            <textarea id="admin-raw-json" class="w-full h-48 bg-black text-purple-200 font-mono text-xs p-3 rounded border border-purple-700 focus:outline-none focus:border-purple-400 custom-scrollbar resize-none mb-3" spellcheck="false"></textarea>
+                            <button onclick="saveRawState()" class="w-full py-2 bg-purple-700 hover:bg-purple-600 font-bold rounded transition-colors text-white text-sm">Commit JSON State</button>
+                        </div>
+                        
+                        <!-- Nuke Zone -->
+                        <div class="bg-red-950 p-6 rounded-xl border border-red-800 flex flex-col justify-center items-center text-center">
+                            <h3 class="font-black text-red-500 text-xl mb-2">DATABASE NUKE</h3>
+                            <p class="text-red-300 text-sm mb-4">Wipes all LocalStorage data globally.</p>
+                            <input type="text" id="nuke-input" placeholder="Type CONFIRM_NUKE_ALL" class="w-full bg-black text-red-500 font-mono text-center px-4 py-3 border border-red-700 rounded mb-4 focus:outline-none focus:border-red-500">
+                            <button onclick="nukeDatabase()" class="w-full py-3 bg-red-700 hover:bg-red-600 font-black rounded transition-colors text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]">INITIATE WIPE</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="switchTab('calendar')" class="px-8 py-3 bg-purple-700 hover:bg-purple-600 font-bold rounded-xl transition-colors text-white shadow-lg border border-purple-500">Exit Admin Mode</button>
+                    </div>
                 </div>
             </div>
 
@@ -353,11 +443,9 @@
     </button>
 
     <!-- Modal Overlays -->
-
     <!-- Persistent Auth Modal (Updated) -->
     <div id="login-modal" class="fixed inset-0 bg-black/50 dark:bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-transform relative">
-            
             <div class="p-6 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-center">
                 <svg class="w-12 h-12 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">Ghadi Ka Pahiya</h2>
@@ -372,23 +460,19 @@
                 <div id="capacity-warning" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-sm font-bold text-center mb-4 border border-red-300">
                     Server Capacity Reached (10/10 Users). Registration Disabled.
                 </div>
-
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Username</label>
                     <input type="text" id="auth-username" required placeholder="Enter username" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
                 </div>
-                
                 <div>
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Password</label>
                     <input type="password" id="auth-password" required placeholder="Enter password or 'Bhootnath'" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
                     <p class="text-xs text-gray-500 mt-1">Universal 'Bhootnath' bypass enabled for existing users.</p>
                 </div>
-
                 <div id="auth-site-password-group" class="hidden">
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Registration Site Key</label>
                     <input type="password" id="auth-site-password" placeholder="Required for new accounts" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
                 </div>
-
                 <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primaryHover shadow-lg hover:shadow-primary/50 transition-all duration-300">Access Session</button>
             </form>
         </div>
@@ -451,7 +535,7 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">Category</label>
                         <select id="task-category" required class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-shadow">
-                            <!-- Options injected via JS based on selected categories -->
+                            <!-- Options injected via JS -->
                         </select>
                     </div>
                 </div>
@@ -467,7 +551,6 @@
                     </div>
                 </div>
                 
-                <!-- Recurrence logic -->
                 <div id="recurrence-container" class="pt-2">
                     <label class="block text-sm font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
