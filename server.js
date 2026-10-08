@@ -8,6 +8,7 @@ if (!ADMIN_TOKEN) { console.error('ADMIN_TOKEN env var is required.'); process.e
 
 let users = {};
 try { users = JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch (e) { users = {}; }
+users = Object.assign(Object.create(null), users);
 let timer = null;
 const save = () => { clearTimeout(timer); timer = setTimeout(() => fs.writeFile(FILE, JSON.stringify(users), () => {}), 500); };
 
@@ -35,7 +36,7 @@ function send(res, code, obj) {
 const adminOk = req => safeEq(req.headers['x-admin-token'] || '', ADMIN_TOKEN);
 
 http.createServer((req, res) => {
-  if (req.method === 'OPTIONS') return send(res, 204, {});
+  if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': ORIGIN, 'Access-Control-Allow-Headers': 'content-type,x-site-key,x-admin-token', 'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS' }); return res.end(); }
   const url = (req.url || '').split('?')[0];
   if (req.method === 'POST' && url === '/api/sync') {
     if (SITE_KEY && !safeEq(req.headers['x-site-key'] || '', SITE_KEY)) return send(res, 401, { error: 'bad key' });
