@@ -67,7 +67,7 @@ function nice(t) {
     const up = hasU && !hasL;
     return t.split(/\s+/).map(w => {
         const l = w.toLowerCase();
-        if (ACR[l]) return ACR[l];
+        if (ACR[l]) return ACR[l]; if (up && ['to','of','and','in','the','for'].includes(l) && w !== t.split(/\s+/)[0]) return l;
         if (up && w.length <= 3 && /^[A-Z]+$/.test(w)) return w;
         return w.charAt(0).toUpperCase() + l.slice(1);
     }).join(' ');
@@ -101,11 +101,11 @@ function prep(b, mod) {
         }
     }
     o._f = f.map(nice); o._t = t; o._id = (b.folders || []).join('/') + '/' + b.title; o._m = mod;
-    o._k = b.playlist ? 'video' : /sol/i.test(raw) ? 'key' : /workbook/i.test(raw) ? 'workbook' : /sheet/i.test(raw) ? 'sheet' : 'pdf';
+    o._k = b.playlist ? 'video' : (/\bsol\b|answerkey|\bsolutions?\b/i.test(raw) && !/liquid solution/i.test(raw)) ? 'key' : /workbook/i.test(raw) ? 'workbook' : /sheet/i.test(raw) ? 'sheet' : 'pdf';
     return o;
 }
 let safeFiles = [];
-try { safeFiles = (window.rawFiles || []).filter(b => b.folders && !b.folders.some(f => f.toUpperCase().includes('CLASS 10') || f.toUpperCase().includes('NUCLEUS'))); } catch (e) { safeFiles = window.rawFiles || []; }
+try { safeFiles = (window.rawFiles || []).filter(b => b.folders && !b.folders.some(f => f.toUpperCase().includes('CLASS 10'))); } catch (e) { safeFiles = window.rawFiles || []; }
 window.libraryData = {
     LECTURES: (window.rawLectures || []).map(b => prep(b, 'LECTURES')),
     FILES: safeFiles.filter(b => b.folders.some(f => ['COACHINGS', 'SUBJECTS', 'PUBLICATIONS', 'NCERT'].includes(f))).map(b => prep(b, 'FILES')),
@@ -545,6 +545,7 @@ function renderTT(up) {
         if (e.target.classList.contains('tt-check')) t.done = e.target.checked; else if (e.target.classList.contains('tt-time-in')) t.time = e.target.value || t.time; else if (e.target.classList.contains('tt-dur')) t.dur = Math.max(5, +e.target.value || 60); else return;
         saveTT(); paintTT();
     };
+    up.onkeydown = e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('tt-text')) { e.preventDefault(); e.target.blur(); } };
     up.onfocusout = e => { if (e.target.classList && e.target.classList.contains('tt-text')) { const t = tt.find(x => x.id === e.target.closest('[data-id]').dataset.id); if (t) { t.text = e.target.textContent.trim() || t.text; saveTT(); } } };
 }
 function paintTT() {
@@ -564,6 +565,7 @@ function renderTTNow() { const l = $('tt-nowline'); if (l) { l.style.top = Math.
 function bindGrid() {
     const g = $('tt-grid'); if (!g) return; let drag = null;
     g.onpointerdown = e => {
+        if (e.button !== 0) return;
         const b = e.target.closest('.tt-block'); if (!b) return; const t = tt.find(x => x.id === b.dataset.id);
         drag = { b, t, y0: e.clientY, top0: parseFloat(b.style.top), moved: false }; g.setPointerCapture(e.pointerId); b.classList.add('drag');
     };
@@ -571,11 +573,11 @@ function bindGrid() {
     g.onpointerup = e => {
         if (!drag) return; const { b, t, moved } = drag; drag = null; b.classList.remove('drag');
         if (moved) { const m = Math.round(((parseFloat(b.style.top) / GH) * 60 + G0) / 15) * 15; t.time = fromMin(Math.min(24 * 60 - 15, Math.max(G0, m))); } else t.done = !t.done;
-        saveTT(); paintTT();
+        window.__ttUp = Date.now(); saveTT(); setTimeout(paintTT, 0);
     };
-    g.ondblclick = e => { const b = e.target.closest('.tt-block'); if (!b) return; const t = tt.find(x => x.id === b.dataset.id), v = prompt('Rename task', t.text); if (v && v.trim()) { t.text = v.trim(); saveTT(); paintTT(); } };
+    g.ondblclick = e => { const b = (document.elementFromPoint(e.clientX, e.clientY) || e.target).closest('.tt-block'); if (!b) return; const t = tt.find(x => x.id === b.dataset.id), v = prompt('Rename task', t.text); if (v && v.trim()) { t.text = v.trim(); saveTT(); paintTT(); } };
     g.oncontextmenu = e => { const b = e.target.closest('.tt-block'); if (!b) return; e.preventDefault(); if (confirm('Delete this task?')) { tt = tt.filter(x => x.id !== b.dataset.id); saveTT(); paintTT(); } };
-    g.onclick = e => { if (e.target.closest('.tt-block')) return; const r = g.getBoundingClientRect(), m = Math.round(((e.clientY - r.top) / GH * 60 + G0) / 30) * 30, tx = prompt('New task at ' + fromMin(m) + ':'); if (tx && tx.trim()) { addTT(fromMin(Math.min(24 * 60 - 30, m)), tx.trim(), 60, 'General'); paintTT(); } };
+    g.onclick = e => { if (Date.now() - (window.__ttUp || 0) < 400 || e.target.closest('.tt-block')) return; const r = g.getBoundingClientRect(), m = Math.round(((e.clientY - r.top) / GH * 60 + G0) / 30) * 30, tx = prompt('New task at ' + fromMin(m) + ':'); if (tx && tx.trim()) { addTT(fromMin(Math.min(24 * 60 - 30, m)), tx.trim(), 60, 'General'); paintTT(); } };
 }
 setInterval(() => {
     if (!isAuthed()) return; const d = ld() + fromMin(nowMin());
@@ -675,10 +677,10 @@ $('audio-toggle')?.addEventListener('click', e => {
                 const w = Math.random() * 2 - 1;
                 if (type === 'white') out[i] = w * 0.1;
                 else if (type === 'brown') { last = (last + 0.02 * w) / 1.02; out[i] = last * 1.5; }
-                else if (type === 'green') { b0 = 0.99 * b0 + w * 0.01; b1 = 0.99 * b1 + b0 * 0.01; out[i] = b1 * 4; }
+                else if (type === 'green') out[i] = w * 0.5;
                 else { b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852; b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898; out[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926; }
             }
-            const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(synthGain); src.start(); synthNode = src;
+            const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; if (type === 'green') { const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 500; bp.Q.value = 0.5; src.connect(bp); bp.connect(synthGain); } else src.connect(synthGain); src.start(); synthNode = src;
         }
     } else { $('audio-iframe-box').style.display = 'block'; $('audio-frame').src = `https://www.youtube.com/embed/${type}?autoplay=1&rel=0&modestbranding=1`; }
 });
@@ -779,7 +781,7 @@ $('set-body')?.addEventListener('change', e => {
     if (['sbWidth'].includes(k)) v = Math.round(v);
     changeSetting(k, v);
 });
-$('set-body')?.addEventListener('input', e => { const t = e.target; if (t.type === 'range' || (t.type === 'color')) { const k = t.dataset.k; changeSetting(k, t.type === 'range' ? parseFloat(t.value) : t.value); } });
+$('set-body')?.addEventListener('input', e => { const t = e.target; if (t.type === 'color') { S.accent = t.value; saveS(); applySettings(); } else if (t.type === 'range') changeSetting(t.dataset.k, parseFloat(t.value)); });
 $('set-reset')?.addEventListener('click', () => { if (confirm('Reset all preferences to defaults?')) { S = Object.assign({}, DEF); saveS(); applySettings(); setMode('focus'); renderSettings(); } });
 
 /* ============ API FOR SEA LION ============ */
