@@ -106,7 +106,6 @@
       { re: /\b(flip a coin|coin flip|toss a coin|heads or tails)\b/, f: () => 'I flipped it… <b>' + (Math.random() < .5 ? 'Heads' : 'Tails') + '</b>!' },
       { re: /\b(roll (a |the )?(dice|die)|dice)\b/, f: () => '🎲 You rolled a <b>' + (1 + Math.floor(Math.random() * 6)) + '</b>!' },
       { re: /\b(fish|sardine|herring|salmon|snack)\b/, f: () => pick(B.fish) },
-      { re: /\b(jee|iit|neet|mains|advanced|boards?|exam strategy)\b/, f: () => pick(B.jee) },
       { re: /\b(sleep|sleepy|nap|insomnia|bedtime)\b/, f: () => pick(B.sleep) },
       { re: /\b(quiz|flash ?card|test me|question me|ask me)\b/, f: () => quiz() },
       { re: /\b(start|begin|run|resume)\b.*\b(timer|pomodoro|focus)\b|\b(timer|pomodoro|focus)\b.*\b(start|begin|go)\b|^(start timer|pomodoro)$/, f: () => go(() => RR().pomo.start(), '⏱ Timer started. *Arf!* Focus mode on.') },
@@ -145,7 +144,7 @@
       idxs.forEach(i => {
         const b = window.masterList[i], btn = document.createElement('button');
         btn.className = 'chat-match-btn'; btn.dataset.index = i;
-        btn.textContent = (b._k === 'lecture' ? '🎬 ' : '📄 ') + (b._t || b.title);
+        btn.textContent = (b._k === 'video' ? '🎬 ' : '📄 ') + (b._t || b.title);
         d.appendChild(btn);
       });
       scroll();
@@ -181,12 +180,13 @@
       for (const it of INTENTS) {
         if (has(q, it.re)) {
           const out = it.f();
-          if (out) addBot(act('') + out);
+          if (out) addBot(sounds() ? out : out.replace(/\*[^*]+\*\s*/g, ''));
           setChips(it.chips || BASE_CHIPS); return;
         }
       }
       const res = search(q);
       if (res.length) { showResults(res); setChips(BASE_CHIPS); }
+      else if (/\b(jee|iit|neet|mains|advanced|boards?|exam strategy)\b/.test(q)) { addBot(pick(B.jee)); setChips(BASE_CHIPS); }
       else { addBot(pick(B.confused)); setChips(['Study tip', 'Tell me a joke', 'Quiz me', 'Help']); }
     }
     let lastPic = null;
