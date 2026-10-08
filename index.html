@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Dashboard Pro</title>
+    
+    <!-- EXTERNAL STYLES -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- EXTERNAL SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="script.js" defer></script>
+    <script src="sealion.js" defer></script>
+</head>
+<body class="theme-amoled font-medium">
+
+    <!-- AUTHENTICATION OVERLAY -->
+    <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--primary-bg); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="background:var(--sidebar-bg); padding:40px; border-radius:var(--radius-lg); box-shadow:var(--card-shadow); border:1px solid var(--border-color); text-align:center; max-width:400px; width:90%;">
+            <h2 style="margin-bottom:20px;">🔒 Dashboard Login</h2>
+            <input type="text" id="auth-user" placeholder="Username" style="width:100%; padding:12px; margin-bottom:15px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--folder-bg); color:var(--text-color); outline:none;">
+            <input type="password" id="auth-pass" placeholder="Site Wide Password" style="width:100%; padding:12px; margin-bottom:20px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--folder-bg); color:var(--text-color); outline:none;">
+            <button class="primary-btn" id="auth-btn" style="width:100%; justify-content:center; padding:14px; font-size:1.1em;">Access Workspace</button>
+            <p id="auth-error" style="color:var(--danger); margin-top:15px; display:none; font-weight:600; font-size:0.9em;">Access Denied. Incorrect Password.</p>
+        </div>
+    </div>
+
+    <div id="ambient-bg" class="bg-none"></div>
+    <div id="toast-container"></div>
+
+    <!-- OFFLINE OVERLAY -->
+    <div id="offline-overlay" class="fs-overlay">
+        <img src="./assets/Important/Net 1.jpg" alt="No Internet" onerror="this.onerror=null; this.src=this.src.replace('.jpg', '.png').replace('.JPG', '.png');">
+        <h2>WIFI BEWAAFA HAI</h2>
+        <p>You have lost connection to the matrix. Please check your internet connection to continue streaming lectures.</p>
+    </div>
+
+    <!-- BURNOUT / TOUCH GRASS OVERLAY -->
+    <div id="burnout-overlay" class="fs-overlay">
+        <img src="./assets/Important/Touch Grass 1.jpg" alt="Touch Grass" onerror="this.onerror=null; this.src=this.src.replace('.jpg', '.png').replace('.JPG', '.png');">
+        <h2 style="color: #10b981;">GO TOUCH GRASS</h2>
+        <p>You've been studying hardcore for hours today. Your CPU is melting and your posture resembles a shrimp. Take a mandatory break!</p>
+        <button class="primary-btn" id="burnout-close" style="padding: 14px 24px; font-size: 1.1em;">I Promise to Touch Grass</button>
+    </div>
+
+    <!-- ADMIN MODE OVERLAY -->
+    <div id="admin-overlay" class="fs-overlay" style="background: rgba(0,0,0,0.95); font-family: 'Inter', sans-serif; align-items: center; justify-content: center; padding: 20px;">
+        <div class="admin-terminal">
+            <div class="admin-header">
+                <div class="admin-title-group">
+                    <h2 class="admin-title">⛑ ROOT TERMINAL OVERRIDE</h2>
+                    <span class="admin-subtitle">System Administrator Access - Level 9</span>
+                </div>
+                <button class="icon-btn admin-exit-btn" id="admin-close" title="Exit Matrix">✖</button>
+            </div>
+            
+            <div class="admin-stats-row">
+                <div class="admin-stat-card"><h3>4</h3><p>Active Nodes</p></div>
+                <div class="admin-stat-card"><h3>1.2TB</h3><p>Data Transferred</p></div>
+                <div class="admin-stat-card"><h3 class="status-optimal">OPTIMAL</h3><p>System Status</p></div>
+            </div>
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table" id="admin-users-table">
+                    <thead>
+                        <tr>
+                            <th>User ID & Exact Username</th>
+                            <th>Credentials & Security</th>
+                            <th>System & Geo-Location</th>
+                            <th>Precise Session Logs (Last 5)</th>
+                            <th>Detailed Status & Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-body">
+                        <!-- Populated dynamically by script.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-danger-zone">
+                <div class="danger-info">
+                    <h3>⚠️ SYSTEM NUKE OVERRIDE</h3>
+                    <p>Warning: This action will obliterate all local storage and configurations across the active environment.</p>
+                </div>
+                <div class="danger-actions">
+                    <input type="password" id="nuke-code" placeholder="Enter Secret Code">
+                    <button class="btn-nuke" id="btn-nuke">EXECUTE NUKE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><img id="sidebar-logo" src="./assets/Important/Logo 2.jpg" class="sidebar-logo" alt="Logo" style="cursor: pointer;"> Dashboard</h2>
+                <div class="header-controls">
+                    <!-- Mobile Close Toggle -->
+                    <button class="icon-btn mobile-close-btn" id="mobile-sidebar-close" style="display:none;" title="Close Sidebar">✖</button>
+                </div>
+            </div>
+
+            <!-- OPTIMIZED POMODORO -->
+            <div class="pomo-container">
+                <div class="pomo-card" id="pomo-card">
+                    <div class="pomo-top-row">
+                        <div class="pomo-avatar-section">
+                            <span class="pomo-icon" id="pomo-icon-display">⚡</span>
+                            <div class="pomo-speech-bubble" id="pomo-quote">Ready to focus!</div>
+                        </div>
+                        <div class="pomo-timer-section">
+                            <div class="pomo-time" id="pomo-time">25:00</div>
+                        </div>
+                    </div>
+                    <div class="pomo-plant-section">
+                        <span class="pomo-plant-icon" id="pomo-plant-stage">🌱</span>
+                        <div class="pomo-progress-bar"><div id="pomo-progress-fill"></div></div>
+                    </div>
+                    <select id="pomo-subject" class="pomo-subject-select">
+                        <option value="General">General Study</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Maths">Maths</option>
+                    </select>
+                    <div class="pomo-controls">
+                        <button class="pomo-btn-sec" id="pomo-reset">Reset</button>
+                        <button class="pomo-btn-main" id="pomo-toggle">▶ Start Focus</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="module-tabs" id="module-tabs">
+                <button class="mod-tab active" data-tab="LECTURES">Lectures</button>
+                <button class="mod-tab" data-tab="FILES">Files</button>
+                <button class="mod-tab" data-tab="SUPPORT">Support</button>
+                <button class="mod-tab" data-tab="UTILITIES">Utilities</button>
+            </div>
+
+            <!-- TAB VIEWS -->
+            <div id="view-library" class="sidebar-view active">
+                <div class="search-container">
+                    <input type="text" id="search-bar" class="search-input" placeholder="Search library (Ctrl+K)...">
+                </div>
+                <div class="book-list" id="book-list"></div>
+            </div>
+            
+            <div id="view-utilities" class="sidebar-view">
+                <div class="util-menu">
+                    <button class="util-card-btn" data-util="analytics"><span class="icon">📊</span><div class="info"><h3>Analytics</h3><p>Track study hours & streaks</p></div></button>
+                    <button class="util-card-btn" data-util="timetable"><span class="icon">📅</span><div class="info"><h3>Timetable</h3><p>Manage daily timeline</p></div></button>
+                    <button class="util-card-btn" data-util="syllabus"><span class="icon">📑</span><div class="info"><h3>Syllabus Tracker</h3><p>Chapter-wise mastery</p></div></button>
+                    <button class="util-card-btn" data-util="flashcards"><span class="icon">📇</span><div class="info"><h3>Flashcards</h3><p>High-yield quick review</p></div></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="reader-header">
+                <button class="icon-btn" id="sidebar-toggle" title="Toggle Sidebar">☰</button>
+                <div class="header-title-box">
+                    <h2 id="current-title" style="display: none;"></h2>
+                    <div class="breadcrumb" id="current-path" style="display: none;"></div>
+                    <select id="playlist-select" class="playlist-select" style="display:none;"></select>
+                    
+                    <div id="home-title-area" style="display: flex; align-items: center; color: var(--text-muted); font-weight: bold; font-size: 1.1em;">
+                        Welcome to Workspace
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="settings-btn-main" class="icon-btn" title="Settings">⚙️</button>
+                    <button id="home-btn" class="icon-btn" title="Home">🏠</button>
+                    <button id="audio-btn" class="icon-btn" title="Audio Player">🎧</button>
+                    <div class="action-divider"></div>
+                    <button id="split-btn" class="icon-btn" title="Split Screen">🔲</button>
+                    <button id="notes-btn" class="icon-btn" title="Notes Drawer">📝</button>
+                    <button id="fs-btn" class="icon-btn" title="Fullscreen">⛶</button>
+                </div>
+            </div>
+
+            <div class="workspace-container" id="main-workspace">
+                <!-- EMPTY STATE (Home) -->
+                <div class="placeholder-box" id="placeholder-box">
+                    <img src="./assets/Important/Background 1.jpg" alt="Bored Robot" onerror="this.onerror=null; this.src=this.src.replace('.jpg', '.png').replace('.JPG', '.png');">
+                    <h3>Ready to Learn?</h3>
+                    <p>Select a module from the sidebar, or configure your settings above to personalize your study space.</p>
+                </div>
+
+                <!-- 404 ERROR STATE -->
+                <div class="placeholder-box" id="error-box" style="display: none; background: transparent; border: none; box-shadow: none;">
+                    <img src="./assets/Important/Error 404 1.jpg" alt="404 Not Found" style="max-width: 350px;" onerror="this.onerror=null; this.src=this.src.replace('.jpg', '.png').replace('.JPG', '.png');">
+                    <h3 style="text-transform: uppercase;">Lost in the Sauce</h3>
+                    <p>The requested file or video could not be loaded. It may be private or deleted.</p>
+                </div>
+
+                <div class="viewer-box" id="viewer-1"><iframe id="frame-1" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe></div>
+                <div class="split-resizer" id="resizer"></div>
+                <div class="viewer-box" id="viewer-2"><iframe id="frame-2" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe></div>
+                
+                <div id="util-panel"></div>
+            </div>
+
+            <!-- NOTES DRAWER -->
+            <div class="notes-panel" id="notes-drawer">
+                <div class="notes-header">
+                    <span id="notes-label">📝 Context Notes</span>
+                    <button class="icon-btn" id="notes-close">✖</button>
+                </div>
+                <textarea class="notes-area" id="notes-area" placeholder="Type notes here... They auto-save locally!"></textarea>
+            </div>
+
+            <!-- AUDIO DRAWER -->
+            <div class="notes-panel" id="audio-drawer" style="z-index: 151;">
+                <div class="notes-header">
+                    <span id="audio-label">🎧 Focus Audio</span>
+                    <button class="icon-btn" id="audio-close">✖</button>
+                </div>
+                <div class="audio-wrapper">
+                    <div class="audio-setting">
+                        <label>Select Track / Generator:</label>
+                        <select id="audio-select">
+                            <optgroup label="Synthesized Ambient (Local)">
+                                <option value="brown">🌊 Brown Noise (Deep Focus)</option>
+                                <option value="pink">🌸 Pink Noise (Balanced Focus)</option>
+                                <option value="white">📻 White Noise (Isolate)</option>
+                                <option value="green">🍃 Green Noise (Nature's Focus)</option>
+                                <option value="binaural">🎧 Binaural Beats (40Hz Gamma)</option>
+                            </optgroup>
+                            <optgroup label="Curated Mixes (YouTube)">
+                                <option value="mPZkdNFkNps">🌧️ Rain & Thunder in Forest</option>
+                                <option value="13e7l0LwR8Y">🎬 Lofi Blade Runner</option>
+                                <option value="ZrKPW5d3idY">📚 Dark Academia</option>
+                                <option value="HGl75kurxok">🌿 Studio Ghibli</option>
+                                <option value="o8XN3G1su9Y">🌌 Hans Zimmer</option>
+                                <option value="5QwoYCf9F5s">🍄 Mario Kart</option>
+                                <option value="PAYlypza1Sc">🌃 Cyberpunk</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="audio-setting" id="volume-container">
+                        <label>Synthesizer Volume:</label>
+                        <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="0.4">
+                    </div>
+                    <button class="primary-btn" id="audio-toggle" style="justify-content:center; padding:16px; font-size:1.1em;">▶ Start Audio</button>
+                    <button class="outline-btn" id="audio-to-main-btn" style="display: none; justify-content: center; padding: 12px; margin-top: -8px;">🖥️ Play on Main Screen</button>
+                    
+                    <div id="audio-iframe-box">
+                        <iframe id="audio-frame" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen" frameborder="0"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERSONAL SEA LION FAB -->
+            <button class="chat-fab" id="chat-fab" title="Personal Sea Lion">
+                <svg viewBox="0 0 100 100" width="34" height="34" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="40" fill="#475569" />
+                    <path d="M 12 40 Q 5 45 10 55" stroke="#475569" stroke-width="5" stroke-linecap="round" fill="none" />
+                    <path d="M 88 40 Q 95 45 90 55" stroke="#475569" stroke-width="5" stroke-linecap="round" fill="none" />
+                    <ellipse cx="50" cy="62" rx="22" ry="16" fill="#cbd5e1" />
+                    <ellipse cx="50" cy="54" rx="8" ry="6" fill="#0f172a" />
+                    <path d="M 40 64 Q 50 72 60 64" stroke="#0f172a" stroke-width="3" stroke-linecap="round" fill="none" />
+                    <circle cx="34" cy="40" r="5" fill="#0f172a" />
+                    <circle cx="66" cy="40" r="5" fill="#0f172a" />
+                    <circle cx="32" cy="38" r="2" fill="#ffffff" />
+                    <circle cx="64" cy="38" r="2" fill="#ffffff" />
+                    <line x1="10" y1="58" x2="30" y2="62" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                    <line x1="8" y1="65" x2="30" y2="65" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                    <line x1="12" y1="72" x2="32" y2="68" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                    <line x1="90" y1="58" x2="70" y2="62" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                    <line x1="92" y1="65" x2="70" y2="65" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                    <line x1="88" y1="72" x2="68" y2="68" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <!-- CHAT WINDOW -->
+            <div class="chat-window" id="chat-window">
+                <div class="modal-header">
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        <svg viewBox="0 0 100 100" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="40" fill="#475569" />
+                            <path d="M 12 40 Q 5 45 10 55" stroke="#475569" stroke-width="5" stroke-linecap="round" fill="none" />
+                            <path d="M 88 40 Q 95 45 90 55" stroke="#475569" stroke-width="5" stroke-linecap="round" fill="none" />
+                            <ellipse cx="50" cy="62" rx="22" ry="16" fill="#cbd5e1" />
+                            <ellipse cx="50" cy="54" rx="8" ry="6" fill="#0f172a" />
+                            <path d="M 40 64 Q 50 72 60 64" stroke="#0f172a" stroke-width="3" stroke-linecap="round" fill="none" />
+                            <circle cx="34" cy="40" r="5" fill="#0f172a" />
+                            <circle cx="66" cy="40" r="5" fill="#0f172a" />
+                            <circle cx="32" cy="38" r="2" fill="#ffffff" />
+                            <circle cx="64" cy="38" r="2" fill="#ffffff" />
+                            <line x1="10" y1="58" x2="30" y2="62" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                            <line x1="8" y1="65" x2="30" y2="65" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                            <line x1="12" y1="72" x2="32" y2="68" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                            <line x1="90" y1="58" x2="70" y2="62" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                            <line x1="92" y1="65" x2="70" y2="65" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                            <line x1="88" y1="72" x2="68" y2="68" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Personal Sea Lion
+                    </span>
+                    <button class="icon-btn" id="chat-close">✖</button>
+                </div>
+                <div class="chat-body" id="chat-body">
+                    <div class="chat-msg bot-msg">*Arf arf!* Flaps flippers excitedly. Type a topic to search, or ask me for a picture of a cat, dog, capybara, or meme!</div>
+                </div>
+                <div class="chat-footer">
+                    <input type="text" id="chat-input" placeholder="Ask Sea Lion...">
+                    <button class="primary-btn" id="chat-send">Ask</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header"><span>⚙️ Preferences</span><button class="icon-btn" id="settings-close">✖</button></div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <label>Theme Shade:</label>
+                    <select id="set-theme">
+                        <option value="theme-amoled">AMOLED Pitch Black</option>
+                        <option value="theme-charcoal">Charcoal Dark</option>
+                        <option value="theme-slate">Slate Navy</option>
+                        <option value="theme-light">Light Mode</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label>Ambient Background:</label>
+                    <select id="set-bg">
+                        <option value="bg-none">None (Solid Theme)</option>
+                        <option value="bg-rain">Rainy Window</option>
+                        <option value="bg-space">Deep Space</option>
+                        <option value="bg-lofi">Neon Lofi Rain (Custom)</option>
+                        <option value="bg-topo">Dark Topography (Custom)</option>
+                        <option value="bg-dynamic">Dynamic Aurora (Animated)</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label>Pomodoro Growth Theme:</label>
+                    <select id="set-pomo-theme">
+                        <option value="plant">Plant (🌱 🌿 🪴 🌳)</option>
+                        <option value="beaker">Beaker (🧫 💧 🧪 🧬)</option>
+                        <option value="flame">Flame (💨 🕯️ 🪵 🔥)</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label>Accent Color:</label>
+                    <div class="color-picker-group">
+                        <div class="color-dot active" data-color="#3b82f6" style="background:#3b82f6;"></div>
+                        <div class="color-dot" data-color="#10b981" style="background:#10b981;"></div>
+                        <div class="color-dot" data-color="#f43f5e" style="background:#f43f5e;"></div>
+                        <div class="color-dot" data-color="#8b5cf6" style="background:#8b5cf6;"></div>
+                        <div class="color-dot" data-color="#f59e0b" style="background:#f59e0b;"></div>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Focus Duration (mins):</label>
+                    <input type="number" id="set-focus" value="25" min="5" max="120">
+                </div>
+                <div class="setting-row">
+                    <label>Pomodoro Icon:</label>
+                    <select id="set-icon">
+                        <option value="⚡">⚡ Lightning (Focus)</option>
+                        <option value="🍅">🍅 Tomato (Classic)</option>
+                        <option value="🧠">🧠 Brain (Deep Work)</option>
+                        <option value="🔥">🔥 Fire (Streak)</option>
+                        <option value="⏱️">⏱️ Timer</option>
+                    </select>
+                </div>
+                <button class="primary-btn" id="save-settings" style="margin-top:10px; justify-content:center; padding:14px; font-size:1.1em;">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
